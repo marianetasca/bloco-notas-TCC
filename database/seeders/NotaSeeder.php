@@ -12,6 +12,6 @@ class NotaSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        
     }
 }
