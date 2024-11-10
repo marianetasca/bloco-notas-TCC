@@ -32,6 +32,22 @@
                         </select>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                        <div class="grid grid-cols-3 gap-4">
+                            @foreach($tags as $tag)
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="tags[]" id="tag_{{ $tag->id }}" value="{{ $tag->id }}"
+                                           {{ in_array($tag->id, $nota->tags->pluck('id')->toArray()) ? 'checked' : '' }}
+                                           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <label for="tag_{{ $tag->id }}" class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {{ $tag->nome }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="flex items-center justify-end mt-4">
                         <button type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">

@@ -13,7 +13,9 @@ class Nota extends Model
         'titulo',
         'conteudo',
         'categoria_id',
-        'user_id'
+        'user_id',
+        // 'prioridade_id',
+        // 'data_entrega'
     ];
 
     protected $casts = [
@@ -41,7 +43,7 @@ class Nota extends Model
      */
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'nota_tag');
+        return $this->belongsToMany(Tag::class, 'nota_tag', 'nota_id', 'tag_id');
     }
 
     /**

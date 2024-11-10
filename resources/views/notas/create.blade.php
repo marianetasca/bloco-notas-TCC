@@ -1,71 +1,57 @@
 @extends('layouts.app')
 
 @section('slot')
-<div class="container">
-    <h1>Criar Nova Nota</h1>
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900 dark:text-gray-100">
+                <form method="POST" action="{{ route('notas.store') }}">
+                    @csrf
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+                    <div class="mb-4">
+                        <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
+                        <input type="text" name="titulo" id="titulo" value="{{ old('titulo') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                    </div>
 
-    <form action="{{ route('notas.store') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label for="titulo" class="form-label">Título</label>
-            <input type="text" class="form-control" id="titulo" name="titulo" value="{{ old('titulo') }}" required>
+                    <div class="mb-4">
+                        <label for="conteudo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Conteúdo</label>
+                        <textarea name="conteudo" id="conteudo" rows="4"
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>{{ old('conteudo') }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
+                        <select name="categoria_id" id="categoria_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                            @foreach($categorias as $categoria)
+                                <option value="{{ $categoria->id }}">{{ $categoria->nome }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                        <div class="grid grid-cols-3 gap-4">
+                            @foreach($tags as $tag)
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="tags[]" id="tag_{{ $tag->id }}" value="{{ $tag->id }}"
+                                           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <label for="tag_{{ $tag->id }}" class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {{ $tag->nome }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end mt-4">
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                            Criar Nota
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="conteudo" class="form-label">Conteúdo</label>
-            <textarea class="form-control" id="conteudo" name="conteudo" rows="4">{{ old('conteudo') }}</textarea>
-        </div>
-        <div class="mb-3">
-            <label for="categoria_id" class="form-label">Categoria</label>
-            <select class="form-control" id="categoria_id" name="categoria_id" required>
-                <option value="">Selecione uma categoria</option>
-                @foreach($categorias as $categoria)
-                    <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
-                        {{ $categoria->nome }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="prioridade_id" class="form-label">Prioridade</label>
-            <select class="form-control" id="prioridade_id" name="prioridade_id">
-                <option value="">Selecione uma prioridade</option>
-                @foreach($prioridades as $prioridade)
-                    <option value="{{ $prioridade->id }}"
-                            {{ old('prioridade_id') == $prioridade->id ? 'selected' : '' }}
-                            style="color: {{ $prioridade->cor }}">
-                        {{ $prioridade->nome }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="data_entrega" class="form-label">Data de Entrega</label>
-            <input type="date" class="form-control" id="data_entrega" name="data_entrega"
-                   value="{{ old('data_entrega') }}">
-        </div>
-        <div class="mb-3">
-            <label for="tags" class="form-label">Tags</label>
-            <select class="form-control" id="tags" name="tags[]" multiple>
-                @foreach($tags as $tag)
-                    <option value="{{ $tag->id }}" {{ in_array($tag->id, old('tags', [])) ? 'selected' : '' }}>
-                        {{ $tag->nome }}
-                    </option>
-                @endforeach
-            </select>
-            <small class="form-text text-muted">Pressione Ctrl (Cmd no Mac) para selecionar múltiplas tags</small>
-        </div>
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="{{ route('notas.index') }}" class="btn btn-secondary">Cancelar</a>
-    </form>
-</div>
+    </div>
 @endsection
