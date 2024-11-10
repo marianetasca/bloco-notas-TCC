@@ -14,12 +14,15 @@ class Nota extends Model
         'conteudo',
         'categoria_id',
         'user_id',
-        // 'prioridade_id',
-        // 'data_entrega'
+        'concluido',
+        'data_vencimento',
+        'prioridade'
     ];
 
     protected $casts = [
-        'data_entrega' => 'date'
+        'data_vencimento' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**

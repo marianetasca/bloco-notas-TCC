@@ -4,6 +4,16 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-100">
+                @if ($errors->any())
+                    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('notas.store') }}">
                     @csrf
 
@@ -19,14 +29,32 @@
                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>{{ old('conteudo') }}</textarea>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
-                        <select name="categoria_id" id="categoria_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
-                            @foreach($categorias as $categoria)
-                                <option value="{{ $categoria->id }}">{{ $categoria->nome }}</option>
-                            @endforeach
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
+                            <select name="categoria_id" id="categoria_id"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                @foreach($categorias as $categoria)
+                                    <option value="{{ $categoria->id }}">{{ $categoria->nome }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="data_vencimento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data de Vencimento</label>
+                            <input type="date" name="data_vencimento" id="data_vencimento" value="{{ old('data_vencimento') }}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                        </div>
+
+                        <div>
+                            <label for="prioridade" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
+                            <select name="prioridade" id="prioridade"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                <option value="baixa">Baixa</option>
+                                <option value="media" selected>Média</option>
+                                <option value="alta">Alta</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-4">

@@ -12,22 +12,47 @@ use Illuminate\Http\Request;
 class NotaController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $notas = Nota::with(['categoria', 'tags'])
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+        $query = Nota::with(['categoria', 'tags'])
+            ->where('user_id', auth()->id());
 
-        // Debug para verificar as tags de cada nota
-        foreach ($notas as $nota) {
-            Log::info("Nota {$nota->id}:", [
-                'titulo' => $nota->titulo,
-                'tags' => $nota->tags->pluck('nome')->toArray()
-            ]);
+        // Filtro por categoria
+        if ($request->filled('categoria')) {
+            $query->where('categoria_id', $request->categoria);
         }
 
-        return view('notas.index', compact('notas'));
+        // Filtro por tag
+        if ($request->filled('tag')) {
+            $query->whereHas('tags', function($q) use ($request) {
+                $q->where('tags.id', $request->tag);
+            });
+        }
+
+        // Busca por título ou conteúdo
+        if ($request->filled('busca')) {
+            $busca = $request->busca;
+            $query->where(function($q) use ($busca) {
+                $q->where('titulo', 'like', "%{$busca}%")
+                  ->orWhere('conteudo', 'like', "%{$busca}%");
+            });
+        }
+
+        // Status (concluído/pendente)
+        if ($request->filled('status')) {
+            $query->where('concluido', $request->status === 'concluido');
+        }
+
+        // Ordenação
+        $ordem = $request->input('ordem', 'desc');
+        $query->orderBy('created_at', $ordem);
+
+        // Paginação (10 itens por página)
+        $notas = $query->paginate(10)->withQueryString();
+        $categorias = Categoria::all();
+        $tags = Tag::all();
+
+        return view('notas.index', compact('notas', 'categorias', 'tags'));
     }
 
 
@@ -52,59 +77,55 @@ class NotaController extends Controller
 
     public function store(Request $request)
     {
-        // Log inicial dos dados recebidos
-        Log::info('Dados recebidos:', [
-            'request' => $request->all(),
-            'tags' => $request->input('tags', [])
-        ]);
+        // Log dos dados recebidos
+        Log::info('Dados recebidos:', $request->all());
 
-        $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'conteudo' => 'required|string',
-            'categoria_id' => 'required|exists:categorias,id',
-            'tags' => 'array|nullable',
-            'tags.*' => 'exists:tags,id'
-        ]);
-
-        // Criar a nota
-        $nota = Nota::create([
-            'titulo' => $validated['titulo'],
-            'conteudo' => $validated['conteudo'],
-            'categoria_id' => $validated['categoria_id'],
-            'user_id' => auth()->id()
-        ]);
-
-        // Anexar tags
-        if ($request->has('tags')) {
-            $tags = $request->input('tags', []);
-
-            // Log antes de anexar as tags
-            Log::info('Tentando anexar tags:', [
-                'nota_id' => $nota->id,
-                'tags' => $tags
+        try {
+            $validated = $request->validate([
+                'titulo' => 'required|string|max:255',
+                'conteudo' => 'required|string',
+                'categoria_id' => 'required|exists:categorias,id',
+                'data_vencimento' => 'nullable|date',
+                'prioridade' => 'required|in:baixa,media,alta',
+                'tags' => 'array|nullable',
+                'tags.*' => 'exists:tags,id'
             ]);
 
-            try {
-                // Usar attach em vez de sync para novas notas
-                $nota->tags()->attach($tags);
+            // Log dos dados validados
+            Log::info('Dados validados:', $validated);
 
-                // Verificar se as tags foram anexadas
-                $notaAtualizada = Nota::with('tags')->find($nota->id);
-                Log::info('Tags anexadas com sucesso:', [
-                    'nota_id' => $nota->id,
-                    'tags' => $notaAtualizada->tags->pluck('nome', 'id')->toArray()
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Erro ao anexar tags:', [
-                    'nota_id' => $nota->id,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
+            $nota = Nota::create([
+                'titulo' => $validated['titulo'],
+                'conteudo' => $validated['conteudo'],
+                'categoria_id' => $validated['categoria_id'],
+                'data_vencimento' => $validated['data_vencimento'] ?? null,
+                'prioridade' => $validated['prioridade'],
+                'user_id' => auth()->id()
+            ]);
+
+            // Log da nota criada
+            Log::info('Nota criada:', $nota->toArray());
+
+            if ($request->has('tags')) {
+                $nota->tags()->attach($request->tags);
+                // Log das tags anexadas
+                Log::info('Tags anexadas:', $request->tags);
             }
-        }
 
-        return redirect()->route('notas.index')
-            ->with('success', 'Nota criada com sucesso.');
+            return redirect()->route('notas.index')
+                ->with('success', 'Nota criada com sucesso.');
+
+        } catch (\Exception $e) {
+            // Log de erro
+            Log::error('Erro ao criar nota:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Erro ao criar nota: ' . $e->getMessage()]);
+        }
     }
 
 
@@ -116,27 +137,29 @@ class NotaController extends Controller
 
     public function update(Request $request, Nota $nota)
     {
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
             'categoria_id' => 'required|exists:categorias,id',
+            'data_vencimento' => 'nullable|date',
+            'prioridade' => 'required|in:baixa,media,alta',
             'tags' => 'array|nullable',
             'tags.*' => 'exists:tags,id'
         ]);
-
-        if ($nota->user_id !== auth()->id()) {
-            abort(403);
-        }
 
         $nota->update([
             'titulo' => $validated['titulo'],
             'conteudo' => $validated['conteudo'],
             'categoria_id' => $validated['categoria_id'],
+            'data_vencimento' => $validated['data_vencimento'],
+            'prioridade' => $validated['prioridade']
         ]);
 
-        // Atualizar tags
-        $tags = $request->input('tags', []);
-        $nota->tags()->sync($tags);
+        $nota->tags()->sync($request->input('tags', []));
 
         return redirect()->route('notas.index')
             ->with('success', 'Nota atualizada com sucesso.');
@@ -154,10 +177,16 @@ class NotaController extends Controller
     public function complete($id)
     {
         $nota = Nota::findOrFail($id);
-        $nota->concluido = true;
+
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $nota->concluido = !$nota->concluido;
         $nota->save();
 
-        return redirect()->route('notas.index')->with('success', 'Anotação marcada como concluída.');
+        return redirect()->route('notas.index')
+            ->with('success', 'Status da nota atualizado com sucesso.');
     }
     public function edit(Nota $nota)
     {

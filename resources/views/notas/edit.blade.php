@@ -20,16 +20,35 @@
                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>{{ old('conteudo', $nota->conteudo) }}</textarea>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
-                        <select name="categoria_id" id="categoria_id"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
-                            @foreach($categorias as $categoria)
-                                <option value="{{ $categoria->id }}" {{ old('categoria_id', $nota->categoria_id) == $categoria->id ? 'selected' : '' }}>
-                                    {{ $categoria->nome }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
+                            <select name="categoria_id" id="categoria_id"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                @foreach($categorias as $categoria)
+                                    <option value="{{ $categoria->id }}" {{ old('categoria_id', $nota->categoria_id) == $categoria->id ? 'selected' : '' }}>
+                                        {{ $categoria->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="data_vencimento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data de Vencimento</label>
+                            <input type="date" name="data_vencimento" id="data_vencimento"
+                                   value="{{ old('data_vencimento', $nota->data_vencimento?->format('Y-m-d')) }}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                        </div>
+
+                        <div>
+                            <label for="prioridade" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
+                            <select name="prioridade" id="prioridade"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                                <option value="baixa" {{ old('prioridade', $nota->prioridade) == 'baixa' ? 'selected' : '' }}>Baixa</option>
+                                <option value="media" {{ old('prioridade', $nota->prioridade) == 'media' ? 'selected' : '' }}>Média</option>
+                                <option value="alta" {{ old('prioridade', $nota->prioridade) == 'alta' ? 'selected' : '' }}>Alta</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-4">

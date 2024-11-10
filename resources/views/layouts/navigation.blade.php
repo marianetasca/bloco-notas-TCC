@@ -12,17 +12,18 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ url('/dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+
+                    <x-nav-link href="{{ route('notas.index') }}" :active="request()->routeIs('notas.*')" class="text-green-500">
+                        {{ __('Minhas Notas') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('notas.index') }}" :active="request()->routeIs('notas.*')">
-                        {{ __('Notas') }}
-                    </x-nav-link>
-                    <x-nav-link href="{{ route('categorias.index') }}" :active="request()->routeIs('categorias.*')">
+                    <x-nav-link href="{{ route('categorias.index') }}" :active="request()->routeIs('categorias.*')" class="text-yellow-500">
                         {{ __('Categorias') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('tags.index') }}" :active="request()->routeIs('tags.*')">
+                    <x-nav-link href="{{ route('tags.index') }}" :active="request()->routeIs('tags.*')" class="text-red-500">
                         {{ __('Tags') }}
+                    </x-nav-link>
+                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" class="text-blue-500">
+                        {{ __('Estatísticas') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -76,9 +77,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+
             <x-responsive-nav-link href="{{ route('notas.index') }}" :active="request()->routeIs('notas.*')">
                 {{ __('Notas') }}
             </x-responsive-nav-link>
@@ -87,6 +86,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('tags.index') }}" :active="request()->routeIs('tags.*')">
                 {{ __('Tags') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Estatísticas') }}
             </x-responsive-nav-link>
         </div>
 
