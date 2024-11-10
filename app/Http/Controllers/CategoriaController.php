@@ -22,7 +22,7 @@ class CategoriaController extends Controller
     {
         $request->validate(['nome' => 'required|max:255',]);
         Categoria::create($request->all());
-        return redirect()->route('categorias.index')->with('success', 'Categoria criada com sucesso.');
+        return redirect()->route('categorias.index')->with('success', 'Categoria criada com sucesso!');
     }
     public function show(Categoria $categoria) // Adicionar o método show
     {
@@ -44,12 +44,12 @@ class CategoriaController extends Controller
         $categoria->save();
 
         return redirect()->route('categorias.index')
-            ->with('success', 'Categoria atualizada com sucesso.');
+            ->with('success', 'Categoria atualizada com sucesso!');
     }
     public function destroy(Categoria $categoria)
     {
         $categoria->delete();
-        return redirect()->route('categorias.index')->with('success', 'Categoria excluída com sucesso.');
+        return redirect()->route('categorias.index')->with('success', 'Categoria excluída com sucesso!');
     }
 
 }

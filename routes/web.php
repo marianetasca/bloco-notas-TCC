@@ -25,6 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('tags', TagController::class);
 
     Route::patch('/notas/{nota}/complete', [NotaController::class, 'complete'])->name('notas.complete');
+
+    Route::delete('/notas/{nota}/anexos/{anexo}', [NotaController::class, 'destroyAnexo'])
+        ->name('notas.anexos.destroy')
+        ->middleware(['auth']);
 });
 
 require __DIR__.'/auth.php';

@@ -6,8 +6,10 @@ use App\Models\Nota;
 use App\Models\Categoria;
 use App\Models\Tag;
 use App\Models\Prioridade;
+use App\Models\Anexo;
 use Illuminate\Support\Facades\Log; // Adicione esta linha
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class NotaController extends Controller
 {
@@ -77,55 +79,46 @@ class NotaController extends Controller
 
     public function store(Request $request)
     {
-        // Log dos dados recebidos
-        Log::info('Dados recebidos:', $request->all());
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'conteudo' => 'required|string',
+            'categoria_id' => 'required|exists:categorias,id',
+            'data_vencimento' => 'nullable|date',
+            'prioridade' => 'required|in:baixa,media,alta',
+            'tags' => 'array|nullable',
+            'tags.*' => 'exists:tags,id',
+            'anexos' => 'array|nullable', // Validação para array de arquivos
+            'anexos.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120' // 5MB max por arquivo
+        ]);
 
-        try {
-            $validated = $request->validate([
-                'titulo' => 'required|string|max:255',
-                'conteudo' => 'required|string',
-                'categoria_id' => 'required|exists:categorias,id',
-                'data_vencimento' => 'nullable|date',
-                'prioridade' => 'required|in:baixa,media,alta',
-                'tags' => 'array|nullable',
-                'tags.*' => 'exists:tags,id'
-            ]);
+        $nota = Nota::create([
+            'titulo' => $validated['titulo'],
+            'conteudo' => $validated['conteudo'],
+            'categoria_id' => $validated['categoria_id'],
+            'data_vencimento' => $validated['data_vencimento'],
+            'prioridade' => $validated['prioridade'],
+            'user_id' => auth()->id()
+        ]);
 
-            // Log dos dados validados
-            Log::info('Dados validados:', $validated);
-
-            $nota = Nota::create([
-                'titulo' => $validated['titulo'],
-                'conteudo' => $validated['conteudo'],
-                'categoria_id' => $validated['categoria_id'],
-                'data_vencimento' => $validated['data_vencimento'] ?? null,
-                'prioridade' => $validated['prioridade'],
-                'user_id' => auth()->id()
-            ]);
-
-            // Log da nota criada
-            Log::info('Nota criada:', $nota->toArray());
-
-            if ($request->has('tags')) {
-                $nota->tags()->attach($request->tags);
-                // Log das tags anexadas
-                Log::info('Tags anexadas:', $request->tags);
-            }
-
-            return redirect()->route('notas.index')
-                ->with('success', 'Nota criada com sucesso.');
-
-        } catch (\Exception $e) {
-            // Log de erro
-            Log::error('Erro ao criar nota:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return back()
-                ->withInput()
-                ->withErrors(['error' => 'Erro ao criar nota: ' . $e->getMessage()]);
+        if ($request->has('tags')) {
+            $nota->tags()->attach($request->tags);
         }
+
+        // Processamento dos anexos
+        if ($request->hasFile('anexos')) {
+            foreach ($request->file('anexos') as $arquivo) {
+                $caminho = $arquivo->store('anexos/' . auth()->id(), 'public');
+
+                $nota->anexos()->create([
+                    'nome_original' => $arquivo->getClientOriginalName(),
+                    'caminho' => $caminho,
+                    'tipo_mime' => $arquivo->getMimeType(),
+                    'tamanho' => $arquivo->getSize()
+                ]);
+            }
+        }
+
+        return redirect()->route('notas.index')->with('success', 'Nota criada com sucesso!');
     }
 
 
@@ -137,10 +130,6 @@ class NotaController extends Controller
 
     public function update(Request $request, Nota $nota)
     {
-        if ($nota->user_id !== auth()->id()) {
-            abort(403);
-        }
-
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
@@ -148,7 +137,9 @@ class NotaController extends Controller
             'data_vencimento' => 'nullable|date',
             'prioridade' => 'required|in:baixa,media,alta',
             'tags' => 'array|nullable',
-            'tags.*' => 'exists:tags,id'
+            'tags.*' => 'exists:tags,id',
+            'anexos' => 'array|nullable', // Validação para array de arquivos
+            'anexos.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120' // 5MB max por arquivo
         ]);
 
         $nota->update([
@@ -159,10 +150,25 @@ class NotaController extends Controller
             'prioridade' => $validated['prioridade']
         ]);
 
-        $nota->tags()->sync($request->input('tags', []));
+        if ($request->has('tags')) {
+            $nota->tags()->sync($request->tags);
+        }
 
-        return redirect()->route('notas.index')
-            ->with('success', 'Nota atualizada com sucesso.');
+        // Processamento dos novos anexos
+        if ($request->hasFile('anexos')) {
+            foreach ($request->file('anexos') as $arquivo) {
+                $caminho = $arquivo->store('anexos/' . auth()->id(), 'public');
+
+                $nota->anexos()->create([
+                    'nome_original' => $arquivo->getClientOriginalName(),
+                    'caminho' => $caminho,
+                    'tipo_mime' => $arquivo->getMimeType(),
+                    'tamanho' => $arquivo->getSize()
+                ]);
+            }
+        }
+
+        return redirect()->route('notas.index')->with('success', 'Nota atualizada com sucesso!');
     }
 
 
@@ -171,7 +177,7 @@ class NotaController extends Controller
         $nota->delete();
 
         return redirect()->route('notas.index')
-            ->with('success', 'Nota excluída com sucesso.');
+            ->with('success', 'Nota excluída com sucesso!');
     }
 
     public function complete($id)
@@ -185,8 +191,8 @@ class NotaController extends Controller
         $nota->concluido = !$nota->concluido;
         $nota->save();
 
-        return redirect()->route('notas.index')
-            ->with('success', 'Status da nota atualizado com sucesso.');
+        return redirect()->back()
+            ->with('success', $nota->concluido ? 'Nota marcada como concluída!' : 'Nota marcada como pendente!');
     }
     public function edit(Nota $nota)
     {
@@ -197,5 +203,26 @@ class NotaController extends Controller
         $categorias = Categoria::all();
         $tags = Tag::all();
         return view('notas.edit', compact('nota', 'categorias', 'tags'));
+    }
+
+    public function destroyAnexo(Nota $nota, Anexo $anexo)
+    {
+        // Verifica se o anexo pertence à nota
+        if ($anexo->nota_id !== $nota->id) {
+            abort(403);
+        }
+
+        // Verifica se o usuário é dono da nota
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Remove o arquivo do storage
+        Storage::disk('public')->delete($anexo->caminho);
+
+        // Remove o registro do banco de dados
+        $anexo->delete();
+
+        return back()->with('success', 'Anexo removido com sucesso!');
     }
 }

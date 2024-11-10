@@ -68,4 +68,9 @@ class Nota extends Model
         $diasParaVencer = now()->diffInDays($this->data_entrega, false);
         return $diasParaVencer >= 0 && $diasParaVencer <= 3;
     }
+
+    public function anexos()
+    {
+        return $this->hasMany(Anexo::class);
+    }
 }
