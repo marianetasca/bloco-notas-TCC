@@ -17,6 +17,6 @@ class Tag extends Model
      */
     public function notas()
     {
-        return $this->belongsToMany(Nota::class, 'nota_tag', 'tag_id', 'nota_id');
+        return $this->belongsToMany(Nota::class);
     }
 }

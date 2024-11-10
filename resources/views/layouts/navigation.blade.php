@@ -12,16 +12,16 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ url('/dashboard') }}">
+                    <x-nav-link href="{{ url('/dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ url('/notas/create') }}">
+                    <x-nav-link href="{{ route('notas.index') }}" :active="request()->routeIs('notas.*')">
                         {{ __('Notas') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ url('/categorias/index') }}">
+                    <x-nav-link href="{{ route('categorias.index') }}" :active="request()->routeIs('categorias.*')">
                         {{ __('Categorias') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ url('/tags/index') }}">
+                    <x-nav-link href="{{ route('tags.index') }}" :active="request()->routeIs('tags.*')">
                         {{ __('Tags') }}
                     </x-nav-link>
                 </div>
@@ -78,6 +78,15 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('notas.index') }}" :active="request()->routeIs('notas.*')">
+                {{ __('Notas') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('categorias.index') }}" :active="request()->routeIs('categorias.*')">
+                {{ __('Categorias') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('tags.index') }}" :active="request()->routeIs('tags.*')">
+                {{ __('Tags') }}
             </x-responsive-nav-link>
         </div>
 

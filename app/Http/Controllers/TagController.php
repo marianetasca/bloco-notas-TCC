@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tag;
+use App\Models\Categoria;
 
 
 class TagController extends Controller
@@ -16,8 +17,10 @@ class TagController extends Controller
 
     public function create()
     {
-        return view('tags.create');
+        $categorias = Categoria::all(); // Carregar todas as categorias
+        return view('tags.create', compact('categorias'));
     }
+
 
     public function store(Request $request)
     {
@@ -28,7 +31,7 @@ class TagController extends Controller
         Tag::create($request->all());
 
         return redirect()->route('tags.index')
-                         ->with('success', 'Tag criada com sucesso.');
+            ->with('success', 'Tag criada com sucesso.');
     }
 
     public function edit(Tag $tag)
@@ -45,7 +48,7 @@ class TagController extends Controller
         $tag->update($request->all());
 
         return redirect()->route('tags.index')
-                         ->with('success', 'Tag atualizada com sucesso.');
+            ->with('success', 'Tag atualizada com sucesso.');
     }
 
     public function destroy(Tag $tag)
@@ -53,6 +56,6 @@ class TagController extends Controller
         $tag->delete();
 
         return redirect()->route('tags.index')
-                         ->with('success', 'Tag excluída com sucesso.');
+            ->with('success', 'Tag excluída com sucesso.');
     }
 }

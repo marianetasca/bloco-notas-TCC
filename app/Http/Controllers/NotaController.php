@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\Categoria;
 use App\Models\Tag;
-
+use App\Models\Prioridade;
+use Illuminate\Support\Facades\Log; // Adicione esta linha
 use Illuminate\Http\Request;
 
 class NotaController extends Controller
@@ -12,15 +14,21 @@ class NotaController extends Controller
 
     public function index()
     {
-        $notas = Nota::paginate(10);
+        $notas = Nota::where('user_id', auth()->id())->get();
 
         return view('notas.index', compact('notas'));
     }
 
+
     public function create()
     {
-        return view('notas.create');
+        $categorias = Categoria::all();
+        $tags = Tag::all();
+        $prioridades = Prioridade::orderBy('nivel')->get();
+
+        return view('notas.create', compact('categorias', 'tags', 'prioridades'));
     }
+
 
     // Mostrar a página de detalhes da nota com as tags associadas
     public function show($id)
@@ -33,31 +41,35 @@ class NotaController extends Controller
 
     public function store(Request $request)
     {
-
-
-        // Validação dos dados
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
             'categoria_id' => 'required|exists:categorias,id',
-            'tags' => 'array|exists:tags,id',
+            'prioridade_id' => 'nullable|exists:prioridades,id',
+            'data_entrega' => 'nullable|date',
+            'tags' => 'array',
+            'tags.*' => 'exists:tags,id'
         ]);
 
-        // Criar a nova nota associada ao usuário autenticado
         $nota = Nota::create([
-            'user_id' => $validated['user_id'],
             'titulo' => $validated['titulo'],
             'conteudo' => $validated['conteudo'],
             'categoria_id' => $validated['categoria_id'],
+            'prioridade_id' => $validated['prioridade_id'],
+            'data_entrega' => $validated['data_entrega'],
+            'user_id' => auth()->id()
         ]);
 
-        // Associar as tags
-        if (isset($validated['tags'])) {
-            $nota->tags()->attach($validated['tags']);
+        if ($request->has('tags')) {
+            $nota->tags()->attach($request->tags);
         }
 
-        return redirect()->route('notas.index')->with('success', 'Nota criada com sucesso.');
+        return redirect()->route('notas.index')
+            ->with('success', 'Nota criada com sucesso.');
     }
+
+
+
 
 
 
@@ -70,22 +82,21 @@ class NotaController extends Controller
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
             'categoria_id' => 'required|exists:categorias,id',
-            'tags' => 'array|exists:tags,id', // Assumindo que você vai passar os IDs das tags no campo 'tags'
         ]);
 
-        // Atualizar os dados da nota
-        $nota->update([
-            'titulo' => $validated['titulo'],
-            'conteudo' => $validated['conteudo'],
-            'categoria_id' => $validated['categoria_id'],
-        ]);
-
-        // Atualizar as tags associadas
-        if (isset($validated['tags'])) {
-            $nota->tags()->sync($validated['tags']); // Sincroniza as tags (remove as antigas e adiciona as novas)
+        // Verifica se o usuário é dono da nota
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
         }
 
-        return redirect()->route('notas.index')->with('success', 'Nota atualizada com sucesso.');
+        // Atualiza a nota
+        $nota->titulo = $validated['titulo'];
+        $nota->conteudo = $validated['conteudo'];
+        $nota->categoria_id = $validated['categoria_id'];
+        $nota->save();
+
+        return redirect()->route('notas.index')
+            ->with('success', 'Nota atualizada com sucesso.');
     }
 
 
@@ -97,4 +108,22 @@ class NotaController extends Controller
             ->with('success', 'Nota excluída com sucesso.');
     }
 
+    public function complete($id)
+    {
+        $nota = Nota::findOrFail($id);
+        $nota->concluido = true;
+        $nota->save();
+
+        return redirect()->route('notas.index')->with('success', 'Anotação marcada como concluída.');
+    }
+    public function edit(Nota $nota)
+    {
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $categorias = Categoria::all();
+        $tags = Tag::all();
+        return view('notas.edit', compact('nota', 'categorias', 'tags'));
+    }
 }

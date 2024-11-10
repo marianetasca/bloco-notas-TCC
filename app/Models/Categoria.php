@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Categoria extends Model
 {
     use HasFactory;
+    protected $fillable = ['nome', 'descricao'];
 
-    // Relacionamento com notas
     public function notas()
     {
         return $this->hasMany(Nota::class);

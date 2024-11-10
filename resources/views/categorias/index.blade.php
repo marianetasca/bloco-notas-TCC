@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('content')
+@section('slot')
 <div class="container">
     <h1>Categorias</h1>
     <a href="{{ route('categorias.create') }}" class="btn btn-primary mb-3">Criar Nova Categoria</a>
