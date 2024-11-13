@@ -14,10 +14,24 @@
 
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold">Minhas Notas</h2>
-                        <a href="{{ route('notas.create') }}"
-                           class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                            Nova Nota
-                        </a>
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ route('notas.lixeira') }}"
+                               class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-trash-alt mr-1"></i>
+                                Lixeira
+                                @if($notasExcluidasCount > 0)
+                                    <span class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                        {{ $notasExcluidasCount }}
+                                    </span>
+                                @endif
+                            </a>
+
+                            <a href="{{ route('notas.create') }}"
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-150">
+                                <i class="fas fa-plus mr-1"></i>
+                                Nova Nota
+                            </a>
+                        </div>
                     </div>
 
                     {{-- Filtros --}}
@@ -82,6 +96,24 @@
                                     </select>
                                 </div>
 
+                                {{-- Prioridade --}}
+                                <div>
+                                    <label for="prioridade" class="block text-sm font-medium">Prioridade</label>
+                                    <select name="prioridade" id="prioridade"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-600">
+                                        <option value="">Todas as Prioridades</option>
+                                        @foreach($prioridades as $prioridade)
+                                            <option value="{{ $prioridade->id }}"
+                                                    {{ request('prioridade') == $prioridade->id ? 'selected' : '' }}
+                                                    style="background-color: {{ $prioridade->cor }}; color: {{ in_array($prioridade->cor, ['#FFC107', '#4CAF50']) ? '#000' : '#fff' }};">
+                                                {{ $prioridade->nome }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {{-- Botões --}}
                                 <div class="flex items-end space-x-2">
                                     <button type="submit"
@@ -113,9 +145,9 @@
                                         {{ $nota->concluido ? 'Concluído' : 'Pendente' }}
                                     </span>
                                     <span class="px-2 py-1 text-xs rounded-full
-                                        {{ $nota->prioridade === 'alta' ? 'bg-red-200 text-red-800' :
-                                           ($nota->prioridade === 'media' ? 'bg-orange-200 text-orange-800' : 'bg-blue-200 text-blue-800') }}">
-                                        Prioridade {{ ucfirst($nota->prioridade) }}
+                                        {{ $nota->prioridade->nivel === 3 ? 'bg-red-200 text-red-800' :
+                                           ($nota->prioridade->nivel === 2 ? 'bg-orange-200 text-orange-800' : 'bg-blue-200 text-blue-800') }}">
+                                        Prioridade: {{ $nota->prioridade->nome }}
                                     </span>
                                     @if($nota->data_vencimento)
                                         <span class="px-2 py-1 text-xs rounded-full
@@ -143,10 +175,49 @@
                                 @endif
                             </div>
 
+                            @if($nota->anexos->count() > 0)
+                                <div class="mt-4 border-t border-gray-700 pt-4">
+                                    <h4 class="text-sm font-medium text-gray-400 mb-2">Anexos:</h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                        @foreach($nota->anexos as $anexo)
+                                            <div class="flex items-center p-2 bg-gray-700 rounded-lg group">
+                                                <div class="flex-1 min-w-0">
+                                                    @if(Str::contains($anexo->tipo_mime, 'image'))
+                                                        <a href="{{ Storage::url($anexo->caminho) }}"
+                                                           target="_blank"
+                                                           class="block relative">
+                                                            <img src="{{ Storage::url($anexo->caminho) }}"
+                                                                 alt="{{ $anexo->nome_original }}"
+                                                                 class="w-full h-20 object-cover rounded">
+                                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded"></div>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ Storage::url($anexo->caminho) }}"
+                                                           target="_blank"
+                                                           class="flex items-center p-2 hover:bg-gray-600 rounded transition-colors">
+                                                            <svg class="w-8 h-8 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                                            </svg>
+                                                        </a>
+                                                    @endif
+                                                    <div class="mt-1 px-2">
+                                                        <p class="text-sm truncate" title="{{ $anexo->nome_original }}">
+                                                            {{ Str::limit($anexo->nome_original, 20) }}
+                                                        </p>
+                                                        <p class="text-xs text-gray-400">
+                                                            {{ number_format($anexo->tamanho / 1024, 1) }} KB
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="mt-4 flex justify-end space-x-2">
-                                <form action="{{ route('notas.complete', $nota->id) }}" method="POST" class="inline">
+                                <form method="POST" action="{{ route('notas.complete', $nota->id) }}" class="inline">
                                     @csrf
-                                    @method('PATCH')
                                     <button type="submit"
                                             class="text-green-600 hover:text-green-900">
                                         {{ $nota->concluido ? 'Desfazer' : 'Concluir' }}

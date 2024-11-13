@@ -7,6 +7,16 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h2 class="text-2xl font-semibold mb-6">Nova Nota</h2>
 
+                    @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('notas.store') }}" enctype="multipart/form-data">
                         @csrf
 
@@ -24,9 +34,11 @@
                             <div>
                                 <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
                                 <select name="categoria_id" id="categoria_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
                                     @foreach($categorias as $categoria)
-                                        <option value="{{ $categoria->id }}">{{ $categoria->nome }}</option>
+                                        <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                            {{ $categoria->nome }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -38,12 +50,12 @@
                             </div>
 
                             <div>
-                                <label for="prioridade" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
-                                <select name="prioridade" id="prioridade"
+                                <label for="prioridade_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
+                                <select name="prioridade_id" id="prioridade_id"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
-                                    <option value="baixa">Baixa</option>
-                                    <option value="media" selected>Média</option>
-                                    <option value="alta">Alta</option>
+                                    @foreach($prioridades as $prioridade)
+                                        <option value="{{ $prioridade->id }}">{{ $prioridade->nome }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -84,7 +96,6 @@
                                     </p>
                                 </div>
                             </div>
-                            {{-- Preview dos arquivos selecionados --}}
                             <div id="fileList" class="mt-2 space-y-2"></div>
                         </div>
 
@@ -107,7 +118,7 @@ document.getElementById('anexos').addEventListener('change', function(e) {
     fileList.innerHTML = '';
 
     Array.from(this.files).forEach(file => {
-        const fileSize = (file.size / (1024 * 1024)).toFixed(2); // Converter para MB
+        const fileSize = (file.size / (1024 * 1024)).toFixed(2);
         const div = document.createElement('div');
         div.className = 'flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400';
         div.innerHTML = `
@@ -150,3 +161,4 @@ function unhighlight(e) {
 }
 </script>
 @endpush
+

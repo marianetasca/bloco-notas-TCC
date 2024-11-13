@@ -27,7 +27,7 @@
                             <div>
                                 <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
                                 <select name="categoria_id" id="categoria_id"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" required>
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
                                     @foreach($categorias as $categoria)
                                         <option value="{{ $categoria->id }}" {{ old('categoria_id', $nota->categoria_id) == $categoria->id ? 'selected' : '' }}>
                                             {{ $categoria->nome }}
@@ -44,12 +44,16 @@
                             </div>
 
                             <div>
-                                <label for="prioridade" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
-                                <select name="prioridade" id="prioridade"
+                                <label for="prioridade_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridade</label>
+                                <select name="prioridade_id" id="prioridade_id"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
-                                    <option value="baixa" {{ old('prioridade', $nota->prioridade) == 'baixa' ? 'selected' : '' }}>Baixa</option>
-                                    <option value="media" {{ old('prioridade', $nota->prioridade) == 'media' ? 'selected' : '' }}>Média</option>
-                                    <option value="alta" {{ old('prioridade', $nota->prioridade) == 'alta' ? 'selected' : '' }}>Alta</option>
+                                    @foreach($prioridades as $prioridade)
+                                        <option value="{{ $prioridade->id }}"
+                                                style="background-color: {{ $prioridade->cor }}; color: {{ in_array($prioridade->cor, ['#FFC107', '#4CAF50']) ? '#000' : '#fff' }};"
+                                                {{ old('prioridade_id', $nota->prioridade_id) == $prioridade->id ? 'selected' : '' }}>
+                                            {{ $prioridade->nome }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -95,7 +99,7 @@
                                                         </svg>
                                                     </a>
                                                     <button type="button"
-                                                            onclick="if(confirm('Tem certeza que deseja remover este anexo?')) document.getElementById('remove-anexo-{{ $anexo->id }}').submit()"
+                                                            onclick="confirmarExclusaoAnexo({{ $anexo->id }})"
                                                             class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -149,6 +153,18 @@
                             @method('DELETE')
                         </form>
                     @endforeach
+
+                    @if(session('success'))
+                        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {{ session('error') }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -214,5 +230,30 @@ function handleDrop(e) {
     fileInput.files = files;
     fileInput.dispatchEvent(new Event('change'));
 }
+
+function confirmarExclusaoAnexo(anexoId) {
+    if (confirm('Tem certeza que deseja remover este anexo? Esta ação não pode ser desfeita.')) {
+        document.getElementById('remove-anexo-' + anexoId).submit();
+    }
+}
 </script>
+@endpush
+
+@push('styles')
+<style>
+    #prioridade_id option {
+        padding: 8px;
+        margin: 2px;
+        border-radius: 4px;
+    }
+
+    #prioridade_id {
+        padding: 8px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
+</style>
 @endpush

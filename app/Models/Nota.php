@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Nota extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'titulo',
@@ -16,7 +17,7 @@ class Nota extends Model
         'user_id',
         'concluido',
         'data_vencimento',
-        'prioridade'
+        'prioridade_id'
     ];
 
     protected $casts = [

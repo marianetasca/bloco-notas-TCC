@@ -11,7 +11,7 @@ class CategoriaController extends Controller
 
     public function index()
     {
-        $categorias = Categoria::all();
+        $categorias = Categoria::where('user_id', auth()->id())->get();
         return view('categorias.index', compact('categorias'));
     }
     public function create()
@@ -20,9 +20,16 @@ class CategoriaController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate(['nome' => 'required|max:255',]);
-        Categoria::create($request->all());
-        return redirect()->route('categorias.index')->with('success', 'Categoria criada com sucesso!');
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255'
+        ]);
+
+        Categoria::create([
+            'nome' => $validated['nome'],
+            'user_id' => auth()->id()
+        ]);
+
+        return redirect()->route('categorias.index');
     }
     public function show(Categoria $categoria) // Adicionar o método show
     {

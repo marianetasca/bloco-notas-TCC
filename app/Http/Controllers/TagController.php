@@ -11,16 +11,14 @@ class TagController extends Controller
 {
     public function index()
     {
-        $tags = Tag::all();
+        $tags = Tag::where('user_id', auth()->id())->get();
         return view('tags.index', compact('tags'));
     }
 
     public function create()
     {
-        $categorias = Categoria::all(); // Carregar todas as categorias
-        return view('tags.create', compact('categorias'));
+        return view('tags.create');
     }
-
 
     public function store(Request $request)
     {
@@ -33,7 +31,7 @@ class TagController extends Controller
             'user_id' => auth()->id()
         ]);
 
-        return redirect()->route('tags.index')->with('success', 'Tag criada com sucesso!');
+        return redirect()->route('tags.index');
     }
 
     public function edit(Tag $tag)

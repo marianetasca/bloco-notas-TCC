@@ -8,24 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasTable('nota_tag')) {
-            Schema::create('nota_tag', function (Blueprint $table) {
-                $table->id();
-                $table->unsignedBigInteger('nota_id');
-                $table->unsignedBigInteger('tag_id');
-                $table->timestamps();
-
-                $table->foreign('nota_id')
-                      ->references('id')
-                      ->on('notas')
-                      ->onDelete('cascade');
-
-                $table->foreign('tag_id')
-                      ->references('id')
-                      ->on('tags')
-                      ->onDelete('cascade');
-            });
-        }
+        Schema::create('nota_tag', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('nota_id')->constrained()->onDelete('cascade');
+            $table->foreignId('tag_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
     }
 
     public function down(): void

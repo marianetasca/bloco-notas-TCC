@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('anexos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('nota_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('nome_original');
             $table->string('caminho');
             $table->string('tipo_mime');

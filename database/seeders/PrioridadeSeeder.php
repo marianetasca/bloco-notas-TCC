@@ -2,41 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Prioridade;
+use Illuminate\Database\Seeder;
 
 class PrioridadeSeeder extends Seeder
 {
     public function run(): void
     {
+        // Verifica se já existem prioridades
+        if (Prioridade::count() > 0) {
+            return;
+        }
+
+        // Cria as novas prioridades
         $prioridades = [
             [
+                'user_id' => 1,
                 'nome' => 'Baixa',
-                'cor' => '#28a745',
-                'nivel' => 1
+                'nivel' => 1,
+                'cor' => '#4CAF50'
             ],
             [
+                'user_id' => 1,
                 'nome' => 'Média',
-                'cor' => '#ffc107',
-                'nivel' => 2
+                'nivel' => 2,
+                'cor' => '#FFC107'
             ],
             [
+                'user_id' => 1,
                 'nome' => 'Alta',
-                'cor' => '#dc3545',
-                'nivel' => 3
+                'nivel' => 3,
+                'cor' => '#F44336'
             ],
             [
+                'user_id' => 1,
                 'nome' => 'Urgente',
-                'cor' => '#9c27b0',
-                'nivel' => 4
+                'nivel' => 4,
+                'cor' => '#B71C1C'
             ]
         ];
 
         foreach ($prioridades as $prioridade) {
-            Prioridade::updateOrCreate(
-                ['nivel' => $prioridade['nivel']],
-                $prioridade
-            );
+            Prioridade::create($prioridade);
         }
     }
 }

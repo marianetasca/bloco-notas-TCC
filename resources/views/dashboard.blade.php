@@ -37,39 +37,35 @@
             {{-- Gráficos detalhados --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Notas por Categoria --}}
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Notas por Categoria</h3>
-                        <div class="space-y-2">
-                            @foreach($notasPorCategoria as $categoria)
-                                <div class="flex justify-between items-center">
-                                    <span class="text-gray-700 dark:text-gray-300">{{ $categoria->nome }}</span>
-                                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-                                        {{ $categoria->notas_count }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
+                <div class="bg-gray-800/50 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-white">Notas por Categoria</h3>
+                    <div class="space-y-3">
+                        @foreach($notasPorCategoria as $categoria)
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300">{{ $categoria->nome }}</span>
+                                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                                    {{ $categoria->notas_count }}
+                                </span>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
                 {{-- Notas por Prioridade --}}
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Notas por Prioridade</h3>
-                        <div class="space-y-2">
-                            @foreach($notasPorPrioridade as $prioridade)
-                                <div class="flex justify-between items-center">
-                                    <span class="text-gray-700 dark:text-gray-300">{{ ucfirst($prioridade->prioridade) }}</span>
-                                    <span class="px-2 py-1 rounded-full text-sm
-                                        {{ $prioridade->prioridade === 'alta' ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' :
-                                           ($prioridade->prioridade === 'media' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
-                                           'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200') }}">
-                                        {{ $prioridade->total }}
-                                    </span>
+                <div class="bg-gray-800/50 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-white">Notas por Prioridade</h3>
+                    <div class="space-y-3">
+                        @foreach($notasPorPrioridade as $item)
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-2.5 h-2.5 rounded-full mr-2" style="background-color: {{ $item->prioridade->cor }}"></div>
+                                    <span class="text-gray-300">{{ $item->prioridade->nome }}</span>
                                 </div>
-                            @endforeach
-                        </div>
+                                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+                                    {{ $item->total }}
+                                </span>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

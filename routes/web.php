@@ -1,42 +1,38 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotaController;
-use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-Route::controller(LoginController::class)->group(function () {
-  Route::get('/login', 'index')->name('login.index');
-  Route::post('/login', 'store')->name('login.store');
-  Route::get('/logout', 'destroy')->name('login.destroy');
+// Rota inicial
+Route::get('/', function () {
+    return redirect()->route('login');
 });
 
+// Rotas de autenticação do Breeze
+require __DIR__.'/auth.php';
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+// Rotas protegidas
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('notas', NotaController::class);
+    Route::get('/lixeira', [NotaController::class, 'lixeira'])->name('notas.lixeira');
+    Route::post('/notas/{id}/restaurar', [NotaController::class, 'restaurar'])->name('notas.restaurar');
+    Route::delete('/notas/{id}/excluir-permanente', [NotaController::class, 'excluirPermanente'])
+        ->name('notas.excluir-permanente');
 
-    Route::resource('categorias', CategoriaController::class);
+    Route::resource('notas', NotaController::class);
+    Route::post('/notas/{nota}/complete', [NotaController::class, 'complete'])->name('notas.complete');
+    Route::delete('/notas/{nota}/anexos/{anexo}', [NotaController::class, 'destroyAnexo'])->name('notas.anexos.destroy');
+    Route::post('/notas', [NotaController::class, 'store'])->name('notas.store');
 
     Route::resource('tags', TagController::class);
-
-    Route::patch('/notas/{nota}/complete', [NotaController::class, 'complete'])->name('notas.complete');
-
-    Route::delete('/notas/{nota}/anexos/{anexo}', [NotaController::class, 'destroyAnexo'])
-        ->name('notas.anexos.destroy')
-        ->middleware(['auth']);
+    Route::resource('categorias', CategoriaController::class);
 });
-
-require __DIR__.'/auth.php';

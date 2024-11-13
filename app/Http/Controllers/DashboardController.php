@@ -11,28 +11,29 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $userId = auth()->id();
+        $categoriasIds = Categoria::where('user_id', auth()->id())->pluck('id');
 
-        // Estatísticas básicas
         $stats = [
-            'total_notas' => Nota::where('user_id', $userId)->count(),
-            'notas_concluidas' => Nota::where('user_id', $userId)->where('concluido', true)->count(),
-            'notas_pendentes' => Nota::where('user_id', $userId)->where('concluido', false)->count(),
-            'notas_vencidas' => Nota::where('user_id', $userId)
+            'total_notas' => Nota::where('user_id', auth()->id())->count(),
+            'notas_concluidas' => Nota::where('user_id', auth()->id())
+                ->where('concluido', true)->count(),
+            'notas_pendentes' => Nota::where('user_id', auth()->id())
+                ->where('concluido', false)->count(),
+            'notas_vencidas' => Nota::where('user_id', auth()->id())
                 ->where('data_vencimento', '<', now())
                 ->where('concluido', false)
                 ->count(),
         ];
 
-        // Notas por categoria
-        $notasPorCategoria = Categoria::withCount(['notas' => function($query) use ($userId) {
-            $query->where('user_id', $userId);
-        }])->get();
+        $notasPorCategoria = Categoria::where('user_id', auth()->id())
+            ->withCount('notas')
+            ->get();
 
-        // Notas por prioridade
-        $notasPorPrioridade = Nota::where('user_id', $userId)
-            ->select('prioridade', DB::raw('count(*) as total'))
-            ->groupBy('prioridade')
+        $notasPorPrioridade = Nota::where('user_id', auth()->id())
+            ->select('prioridade_id')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('prioridade_id')
+            ->with('prioridade')
             ->get();
 
         return view('dashboard', compact('stats', 'notasPorCategoria', 'notasPorPrioridade'));

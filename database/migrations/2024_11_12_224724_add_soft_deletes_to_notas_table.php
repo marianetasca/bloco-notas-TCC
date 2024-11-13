@@ -9,15 +9,14 @@ return new class extends Migration
     public function up()
     {
         Schema::table('notas', function (Blueprint $table) {
-            $table->date('data_vencimento')->nullable();
-            $table->enum('prioridade', ['baixa', 'media', 'alta'])->default('media');
+            $table->softDeletes();
         });
     }
 
     public function down()
     {
         Schema::table('notas', function (Blueprint $table) {
-            $table->dropColumn(['data_vencimento', 'prioridade']);
+            $table->dropSoftDeletes();
         });
     }
 };

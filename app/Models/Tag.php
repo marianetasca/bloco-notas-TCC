@@ -10,7 +10,10 @@ class Tag extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nome'];
+    protected $fillable = [
+        'nome',
+        'user_id'
+    ];
 
     /**
      * Relacionamento: A tag pode estar associada a muitas notas.
