@@ -14,10 +14,10 @@ class Nota extends Model
         'titulo',
         'conteudo',
         'categoria_id',
-        'user_id',
-        'concluido',
+        'prioridade_id',
         'data_vencimento',
-        'prioridade_id'
+        'user_id',
+        'completed_at'
     ];
 
     protected $casts = [

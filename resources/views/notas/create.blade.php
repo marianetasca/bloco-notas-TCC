@@ -85,15 +85,13 @@
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <div class="flex text-sm text-gray-600 dark:text-gray-400">
-                                        <label for="anexos" class="relative cursor-pointer rounded-md font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                            <span>Selecione os arquivos</span>
+                                        <label for="anexos" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                            <span>Selecione arquivos</span>
                                             <input id="anexos" name="anexos[]" type="file" class="sr-only" multiple accept=".pdf,.jpg,.jpeg,.png">
                                         </label>
-                                        <p class="pl-1">ou arraste e solte aqui</p>
+                                        <p class="pl-1">ou arraste e solte</p>
                                     </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        PDF, PNG, JPG, JPEG até 5MB cada
-                                    </p>
+                                    <p class="text-xs text-gray-500">PDF, PNG, JPG até 5MB cada</p>
                                 </div>
                             </div>
                             <div id="fileList" class="mt-2 space-y-2"></div>
@@ -113,52 +111,74 @@
 
 @push('scripts')
 <script>
-document.getElementById('anexos').addEventListener('change', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('anexos');
     const fileList = document.getElementById('fileList');
-    fileList.innerHTML = '';
+    const dropZone = document.querySelector('.border-dashed');
 
-    Array.from(this.files).forEach(file => {
-        const fileSize = (file.size / (1024 * 1024)).toFixed(2);
-        const div = document.createElement('div');
-        div.className = 'flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400';
-        div.innerHTML = `
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>${file.name}</span>
-            <span>(${fileSize} MB)</span>
-        `;
-        fileList.appendChild(div);
-    });
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            console.log('Arquivos selecionados:', this.files); // Debug
+            fileList.innerHTML = '';
+
+            Array.from(this.files).forEach(file => {
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 p-2 bg-gray-700 rounded mt-2';
+                div.innerHTML = `
+                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                    </svg>
+                    <span class="text-sm text-gray-300">${file.name}</span>
+                    <span class="text-xs text-gray-400">(${fileSize} MB)</span>
+                `;
+                fileList.appendChild(div);
+            });
+        });
+    }
+
+    if (dropZone) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        dropZone.addEventListener('drop', handleDrop, false);
+    }
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function highlight(e) {
+        dropZone.classList.add('border-indigo-500');
+    }
+
+    function unhighlight(e) {
+        dropZone.classList.remove('border-indigo-500');
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (fileInput) {
+            // Criar um novo objeto FileList é impossível, então usamos o DataTransfer
+            const newDt = new DataTransfer();
+            Array.from(files).forEach(file => newDt.items.add(file));
+            fileInput.files = newDt.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    }
 });
-
-// Suporte para drag and drop
-const dropZone = document.querySelector('input[type="file"]').closest('div');
-
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults (e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-['dragenter', 'dragover'].forEach(eventName => {
-    dropZone.addEventListener(eventName, highlight, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, unhighlight, false);
-});
-
-function highlight(e) {
-    dropZone.classList.add('border-indigo-500');
-}
-
-function unhighlight(e) {
-    dropZone.classList.remove('border-indigo-500');
-}
 </script>
 @endpush
 

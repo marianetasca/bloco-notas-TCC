@@ -45,7 +45,24 @@ class NotaController extends Controller
             $busca = $request->busca;
             $query->where(function($q) use ($busca) {
                 $q->where('titulo', 'like', "%{$busca}%")
-                  ->orWhere('conteudo', 'like', "%{$busca}%");
+                  ->orWhere('conteudo', 'like', "%{$busca}%")
+                  // Busca nas tags
+                  ->orWhereHas('tags', function($q) use ($busca) {
+                      $q->where('nome', 'like', "%{$busca}%");
+                  })
+                  // Busca nas categorias
+                  ->orWhereHas('categoria', function($q) use ($busca) {
+                      $q->where('nome', 'like', "%{$busca}%");
+                  })
+                  // Busca por múltiplas palavras
+                  ->orWhere(function($q) use ($busca) {
+                      foreach(explode(' ', $busca) as $palavra) {
+                          if(strlen($palavra) >= 3) { // ignora palavras muito curtas
+                              $q->orWhere('titulo', 'like', "%{$palavra}%")
+                                ->orWhere('conteudo', 'like', "%{$palavra}%");
+                          }
+                      }
+                  });
             });
         }
 
@@ -142,12 +159,15 @@ class NotaController extends Controller
                 }
             }
 
-            return redirect()->route('notas.index')->with('success', 'Nota criada com sucesso!');
+            return redirect()
+                ->route('notas.index')
+                ->with('success', 'Nota criada com sucesso!');
+
         } catch (\Exception $e) {
-            // Melhorar o log de erro
-            Log::error('Erro ao criar nota:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::error('Erro ao criar nota', [
+                'erro' => $e->getMessage(),
+                'linha' => $e->getLine(),
+                'arquivo' => $e->getFile()
             ]);
 
             return back()
@@ -165,51 +185,58 @@ class NotaController extends Controller
 
     public function update(Request $request, Nota $nota)
     {
+        dd('Chegou no update', $request->all(), $nota);
+
+        // Adicione este log para debug
+        Log::info('Método update chamado', ['request' => $request->all()]);
+
+        // Verifica permissão
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Validação
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
             'categoria_id' => 'required|exists:categorias,id',
-            'data_vencimento' => 'nullable|date',
             'prioridade_id' => 'required|exists:prioridades,id',
-            'tags' => 'array|nullable',
+            'data_vencimento' => 'nullable|date',
+            'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
-            'anexos' => 'array|nullable',
-            'anexos.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120'
+            'anexos.*' => 'nullable|file|max:10240'
         ]);
 
-        try {
-            $nota->update([
-                'titulo' => $request->titulo,
-                'conteudo' => $request->conteudo,
-                'categoria_id' => $request->categoria_id,
-                'data_vencimento' => $request->data_vencimento,
-                'prioridade_id' => $request->prioridade_id
-            ]);
+        // Atualiza a nota
+        $nota->update([
+            'titulo' => $validated['titulo'],
+            'conteudo' => $validated['conteudo'],
+            'categoria_id' => $validated['categoria_id'],
+            'prioridade_id' => $validated['prioridade_id'],
+            'data_vencimento' => $validated['data_vencimento'],
+        ]);
 
-            if ($request->has('tags')) {
-                $nota->tags()->sync($request->tags);
-            }
-
-            // Processamento dos novos anexos
-            if ($request->hasFile('anexos')) {
-                foreach ($request->file('anexos') as $arquivo) {
-                    $caminho = $arquivo->store('anexos/' . auth()->id(), 'public');
-
-                    $nota->anexos()->create([
-                        'nome_original' => $arquivo->getClientOriginalName(),
-                        'caminho' => $caminho,
-                        'tipo_mime' => $arquivo->getMimeType(),
-                        'tamanho' => $arquivo->getSize()
-                    ]);
-                }
-            }
-
-            return redirect()->route('notas.index')->with('success', 'Nota atualizada com sucesso!');
-        } catch (\Exception $e) {
-            return back()
-                ->withInput()
-                ->with('error', 'Erro ao atualizar nota: ' . $e->getMessage());
+        // Atualiza as tags
+        if (isset($validated['tags'])) {
+            $nota->tags()->sync($validated['tags']);
+        } else {
+            $nota->tags()->detach();
         }
+
+        // Processa os anexos
+        if ($request->hasFile('anexos')) {
+            foreach ($request->file('anexos') as $anexo) {
+                $path = $anexo->store('anexos', 'public');
+                $nota->anexos()->create([
+                    'nome_original' => $anexo->getClientOriginalName(),
+                    'caminho' => $path,
+                    'tipo' => $anexo->getClientMimeType(),
+                    'tamanho' => $anexo->getSize(),
+                ]);
+            }
+        }
+
+        return redirect()->route('notas.index')->with('success', 'Nota atualizada com sucesso!');
     }
 
 
@@ -255,21 +282,12 @@ class NotaController extends Controller
 
     public function destroyAnexo(Nota $nota, Anexo $anexo)
     {
-        // Verificar se o anexo pertence à nota e ao usuário atual
-        if ($anexo->nota_id !== $nota->id || $nota->user_id !== auth()->id()) {
-            abort(403);
-        }
-
         try {
-            // Deletar o arquivo físico
             Storage::disk('public')->delete($anexo->caminho);
-
-            // Deletar o registro do banco
             $anexo->delete();
-
             return back()->with('success', 'Anexo removido com sucesso!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao remover anexo: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao remover anexo.');
         }
     }
 

@@ -29,7 +29,7 @@
 
             <!-- Page Content -->
             <main>
-                @yield('slot')
+               @yield('content')
             </main>
         </div>
     </body>

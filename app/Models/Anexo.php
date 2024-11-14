@@ -19,4 +19,9 @@ class Anexo extends Model
     {
         return $this->belongsTo(Nota::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
