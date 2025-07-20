@@ -30,12 +30,17 @@ Route::middleware(['auth'])->group(function () {
 
     // Rotas específicas de notas (depois do resource)
     Route::get('/lixeira', [NotaController::class, 'lixeira'])->name('notas.lixeira');
-    Route::post('/notas/{id}/restaurar', [NotaController::class, 'restaurar'])->name('notas.restaurar');
-    Route::delete('/notas/{id}/excluir-permanente', [NotaController::class, 'excluirPermanente'])
+    Route::post('/notas/lixeira/{id}/restaurar', [NotaController::class, 'restaurar'])->name('notas.restaurar');
+    Route::delete('/notas/lixeira/{id}/excluir-permanente', [NotaController::class, 'excluirPermanente'])
         ->name('notas.excluir-permanente');
     Route::post('/notas/{nota}/complete', [NotaController::class, 'complete'])->name('notas.complete');
+
+    Route::get('/notas/{nota}/anexos', [NotaController::class, 'anexos'])->name('notas.anexos');
+    Route::post('/anexos/upload', [AnexoController::class, 'Anexo'])->name('anexos.upload');
+
     Route::delete('/notas/{nota}/anexos/{anexo}', [AnexoController::class, 'destroy'])
         ->name('notas.anexos.destroy');
+
 
     // Outros resources
     Route::resource('tags', TagController::class);

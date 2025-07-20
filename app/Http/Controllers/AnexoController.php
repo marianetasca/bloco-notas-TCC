@@ -12,6 +12,27 @@ use Illuminate\Support\Facades\Log; // Adicione esta linha
 
 class AnexoController extends Controller
 {
+
+public function Anexo(Request $request, Nota $nota)
+{
+    if ($request->hasFile('file')) {
+        $file = $request->file('file');
+        $path = $file->store('anexos', 'public');
+
+        $nota->anexos()->create([
+            'nome' => $file->getClientOriginalName(),
+            'caminho' => $path,
+        ]);
+
+        return response()->json(['success' => true, 'path' => $path]);
+    }
+
+    return response()->json(['success' => false], 400);
+}
+
+
+
+
     public function destroy(Nota $nota, Anexo $anexo)
     {
         // Log para debug

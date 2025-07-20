@@ -16,24 +16,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Bootstrap CSS (via CDN) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-RhYwrVqQoy5mKspcZMY5aZsmCLaLXR3RZvxR7xWzYmZkEV2MDmjg9ZuNpA/sPi3Y" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
     <!-- Estilo personalizado -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    <!-- Dropzone -->
+    <script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+    <link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body class="custom-body">
     <div class="layout-container">
         @include('layouts.navigation')
 
-        <main class="container">
+        <main class="container mt-5 pt-4">
             @yield('slot')
         </main>
     </div>
 
     <!-- Bootstrap JS (via CDN) + dependências -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-Q0zX1IAVqv4O+XU4aLuZsA2F9e3gyOvK5kSn4m+4zWv8z8BwlG1OqvhMxgWwjFtY" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous">
+    </script>
 
     @stack('scripts')
 </body>
+
 </html>
+ipvc modularizar

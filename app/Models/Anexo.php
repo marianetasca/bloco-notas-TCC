@@ -15,13 +15,12 @@ class Anexo extends Model
         'user_id'
     ];
 
-    public function nota()
-    {
+    public function nota() {
         return $this->belongsTo(Nota::class);
     }
 
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class);
     }
+
 }
