@@ -1,43 +1,53 @@
 @extends('layouts.app')
 
 @section('slot')
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    @if(session('success'))
-                        <div class="mb-4 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-semibold">Tags</h2>
-                        <a href="{{ route('tags.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-150">
+    <div class="container py-5">
+        <div class="container mt-4">
+            <div class="card shadow rounded-4 h-100">
+                <div class="card-header textColor d-flex justify-content-between align-items-center">
+                    <h2 class="h4 textColor">Tags</h2>
+                    <a href="{{ route('tags.create') }}" class="btn btn-primary-ed btn-sm">
                         Nova Tag
-                        </a>
+                    </a>
+                </div>
+
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
                     </div>
+                @endif
 
-                    @foreach($tags as $tag)
-                        <div class="mb-4 p-4 bg-white dark:bg-gray-700 rounded shadow">
-                            <div class="flex justify-between items-center">
-                                <span class="text-lg">{{ $tag->nome }}</span>
-                                <div class="flex space-x-2">
-                                    <a href="{{ route('tags.edit', $tag->id) }}"
-                                       class="text-blue-600 hover:text-blue-900">Editar</a>
-
-                                    <form action="{{ route('tags.destroy', $tag->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900">
-                                            Excluir
-                                        </button>
-                                    </form>
+                <div class="row row-cols-1 row-cols-md-3 mx-1 mt-2">
+                    @forelse ($tags as $tag)
+                        <div class="col mb-2">
+                            <div class="card h-100 border hover-shadow">
+                                <div class="card-body d-flex flex-column justify-content-between bg-light rounded-2">
+                                    <div>
+                                        <h5 class="card-title">{{ $tag->nome }}</h5>
+                                        <p class="card-text text-muted">{{ $tag->notas->count()}} notas</p>
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 mt-3">
+                                        <a href="{{ route('tags.edit', $tag->id) }}"
+                                            class="btn btn-primary-ed btn-sm" title="Editar">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <form action="{{ route('tags.destroy', $tag->id) }}" method="POST"
+                                            onsubmit="return confirm('Tem certeza que deseja excluir esta tag?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Excluir"><i
+                                                    class="bi bi-trash"></i> Excluir
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="col-12">
+                            <p class="text-muted text-center my-4">Nenhuma tag encontrada.</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>

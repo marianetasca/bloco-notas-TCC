@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('slot')
+    {{-- para correção de erro --}}
+    @php
+        $notasExcluidasCount = $notasExcluidasCount ?? 0;
+    @endphp
     <div class="container pt-4">
 
         {{-- Cabeçalho --}}
@@ -28,14 +32,14 @@
                     <div class="row g-3">
 
                         {{-- Busca --}}
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-6">
                             <label for="busca" class="form-label">Buscar</label>
                             <input type="text" id="busca" name="busca" value="{{ request('busca') }}"
                                 class="form-control" placeholder="Pesquisar...">
                         </div>
 
                         {{-- Categoria --}}
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-6 col-6">
                             <label for="categoria" class="form-label">Categoria</label>
                             <select id="categoria" name="categoria" class="form-select">
                                 <option value="">Todas</option>
@@ -49,7 +53,7 @@
                         </div>
 
                         {{-- Tag --}}
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-6 col-6">
                             <label for="tag" class="form-label">Tag</label>
                             <select id="tag" name="tag" class="form-select">
                                 <option value="">Todas</option>
@@ -62,7 +66,7 @@
                         </div>
 
                         {{-- Ordenação --}}
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-6 col-6">
                             <label for="ordem" class="form-label">Ordenar por</label>
                             <select id="ordem" name="ordem" class="form-select">
                                 <option value="desc" {{ request('ordem') == 'desc' ? 'selected' : '' }}>Mais recentes
@@ -73,7 +77,7 @@
                         </div>
 
                         {{-- Status --}}
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-6 col-6">
                             <label for="status" class="form-label">Status</label>
                             <select id="status" name="status" class="form-select">
                                 <option value="">Todos</option>
@@ -85,7 +89,7 @@
                         </div>
 
                         {{-- Prioridade --}}
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-6 col-6">
                             <label for="prioridade" class="form-label">Prioridade</label>
                             <select id="prioridade" name="prioridade" class="form-select">
                                 <option value="">Todas</option>
@@ -120,21 +124,24 @@
                         <p class="card-text mt-2">{{ Str::limit($nota->conteudo, 150) }}</p>
 
                         {{-- badges no canto superior direito --}}
+                        {{-- concluido/pendente --}}
                         <div class="position-absolute top-0 end-0 text-end p-2">
-                            <span class="badge rounded-pill {{ $nota->concluido ? 'bg-success' : 'bg-warning ' }}">
+                            <span class="badge rounded-pill {{ $nota->concluido ? 'bg-success' : 'bg-warning-ed ' }}">
                                 {{ $nota->concluido ? 'Concluído' : 'Pendente' }}
                             </span>
                             <br>
+                            {{-- prioridade --}}
                             <span
                                 class="badge rounded-pill
                                 {{ $nota->prioridade->nivel === 3
                                     ? ' border border-danger text-danger'
                                     : ($nota->prioridade->nivel === 2
-                                        ? 'bg-medi border border-warning text-warning'
+                                        ? 'bg-medi border-warning-ed text-warning-ed'
                                         : 'text-primary border border-primary') }}">
                                 Prioridade: {{ $nota->prioridade->nome }}
                             </span>
                             <br>
+                            {{-- vencimento --}}
                             @if ($nota->data_vencimento)
                                 <span
                                     class="badge rounded-pill {{ $nota->data_vencimento->isPast() && !$nota->concluido ? 'bg-danger' : 'bg-secondary' }}">
@@ -194,27 +201,31 @@
                     </div>
 
                     {{-- Vinculação com o show --}}
-                    <a href="{{ route('notas.show', $nota->id) }}" class="btn btn-outline-secondary btn-sm m-2">Visualizar nota</a>
+                    <a href="{{ route('notas.show', $nota->id) }}"
+                        class="btn btn-outline-secondary btn-sm m-2">Visualizar nota</a>
 
 
                     {{-- Ações --}}
                     <div class="mt-auto d-flex justify-content-end gap-2 me-2 mb-2">
                         <form method="POST" action="{{ route('notas.complete', $nota->id) }}" class="m-0">
-                            @csrf {{-- concluido ou desfazer --}}
-                            <button type="submit" class="btn btn-sm {{ $nota->concluido ? 'btn-warning' : 'btn-success' }}">
-                                @if($nota->concluido)
+                            @csrf
+                            {{-- concluido ou desfazer --}}
+                            <button type="submit"
+                                class="btn btn-sm {{ $nota->concluido ? 'btn-warning' : 'btn-success' }}">
+                                @if ($nota->concluido)
                                     <i class="bi bi-arrow-counterclockwise"></i> Desfazer
                                 @else
                                     <i class="bi bi-check-circle"></i> Concluir
                                 @endif
                             </button>
+                        </form>
                         {{-- editar --}}
-                        <a href="{{ route('notas.edit', $nota->id) }}" class="btn btn-sm btn-primary-ed">
+                        <a href="{{ route('notas.edit', $nota->id) }}" class="btn btn-sm btn-primary-ed2">
                             <i class="bi bi-pencil"></i> Editar
                         </a>
                         {{-- deletar --}}
-                        <form action="{{ route('notas.destroy', $nota->id) }}" method="POST"
-                            onsubmit="return confirm('Tem certeza que deseja excluir?')" class="m-0">
+                        <form action="{{ route('notas.destroy', $nota->id) }}" method="POST" class="d-inline"
+                            onsubmit="return confirm('Tem certeza que deseja excluir esta nota?')" class="m-0">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger">
@@ -222,7 +233,6 @@
                             </button>
                         </form>
                     </div>
-
                 </div>
             </div>
         @empty

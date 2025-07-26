@@ -28,7 +28,7 @@ class LimparLixeira extends Command
      */
     public function handle()
     {
-        $prazo = Carbon::now()->subDays(30);
+        $prazo = Carbon::now()->subDays(1);
 
         $notas = Nota::onlyTrashed()
             ->where('deleted_at', '<', $prazo)

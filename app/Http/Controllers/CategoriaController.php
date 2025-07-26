@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;//para validação do nome das tags
+
 use App\Models\Categoria;
 
 
@@ -14,14 +16,20 @@ class CategoriaController extends Controller
         $categorias = Categoria::where('user_id', auth()->id())->get();
         return view('categorias.index', compact('categorias'));
     }
+
+    /*======== Método create ========*/
     public function create()
     {
         return view('categorias.create');
     }
+
+    /*======== Método store ========*/
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nome' => 'required|string|max:255'
+            'nome' => 'required|string|max:255|unique:categorias,nome',
+            Rule::unique('categorias')->where(function ($query) {
+                return $query->where('user_id', auth()->id());}),
         ]);
 
         Categoria::create([
@@ -29,32 +37,53 @@ class CategoriaController extends Controller
             'user_id' => auth()->id()
         ]);
 
-        return redirect()->route('categorias.index');
+        return redirect()->route('categorias.index')->with('success', 'Categoria criada com sucesso!');
     }
+
+    /*======== Método show ========*/
     public function show(Categoria $categoria) // Adicionar o método show
     {
         return view('categorias.show', compact('categoria'));
     }
+
+    /*======== Método edit ========*/
     public function edit(Categoria $categoria)
     {
+        if ($categoria->is_default) {
+            return redirect()->route('categorias.index')->with('error', 'Não é possível editar a categoria padrão.');
+        }
         return view('categorias.edit', compact('categoria'));
     }
+
+    /*======== Método update ========*/
     public function update(Request $request, Categoria $categoria)
     {
-        // Validação dos dados
+        if ($categoria->is_default) {
+            return redirect()->route('categorias.index')->with('error', 'Não é possível editar a categoria padrão.');
+        }
+
+        //Validação dos dados para não haver duplicatas
         $validated = $request->validate([
-            'nome' => 'required|string|max:255'
+            'nome' => 'required|string|max:255|unique:categorias,nome,' . $categoria->id, //. $categoria->id serve para que se o usuario atualizar para o mesmo nome que estava nao der erro
+            Rule::unique('categorias')->ignore($categoria->id)->where(function ($query) {
+                return $query->where('user_id', auth()->id());
+            }),
         ]);
 
         // Atualiza a categoria
-        $categoria->nome = $validated['nome'];
-        $categoria->save();
+        $categoria->update(['nome' => $validated['nome']]);
 
         return redirect()->route('categorias.index')
             ->with('success', 'Categoria atualizada com sucesso!');
     }
+
+    /*======== Método destroy ========*/
     public function destroy(Categoria $categoria)
     {
+        if ($categoria->is_default) {
+            return redirect()->route('categorias.index')->with('error', 'Não é possível excluir a categoria padrão.');
+        }
+
         $categoria->delete();
         return redirect()->route('categorias.index')->with('success', 'Categoria excluída com sucesso!');
     }

@@ -45,13 +45,15 @@ class RegisteredUserController extends Controller
 
         Categoria::create([
             'nome' => 'Sem categoria',
-            'user_id' => $user->id
+            'user_id' => $user->id,
+            'descricao' => 'Categoria padrão do sistema',
+            'is_default' => true,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('notas.index');
     }
 }

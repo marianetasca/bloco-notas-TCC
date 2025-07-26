@@ -1,74 +1,135 @@
 @extends('layouts.app')
 
 @section('slot')
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            {{-- Cards principais --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total de Notas</div>
-                        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['total_notas'] }}</div>
-                    </div>
+    <div class="container py-5">
+
+        {{-- Filtros (data, mês, ano) --}}
+
+        <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-end gap-2 mb-4">
+            <div class="row g-3">
+                {{-- Data --}}
+                <div class="col-md-3 col-6 w-auto">
+                    <input type="date" name="data" class="form-control" value="{{ request('data') }}">
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">Concluídas</div>
-                        <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $stats['notas_concluidas'] }}</div>
-                    </div>
+                {{-- Mês --}}
+                <div class="col-md-3 col-6 w-auto">
+                    <select name="mes" class="form-select">
+                        <option value="">Todos os meses</option>
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ request('mes') == $m ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endfor
+                    </select>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pendentes</div>
-                        <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['notas_pendentes'] }}</div>
-                    </div>
+                {{-- Ano --}}
+                <div class="col-md-3 col-6 w-auto">
+                    <select name="ano" class="form-select">
+                        <option value="">Todos os anos</option>
+                        @for ($a = now()->year; $a >= now()->year - 5; $a--)
+                            <option value="{{ $a }}" {{ request('ano') == $a ? 'selected' : '' }}>
+                                {{ $a }}
+                            </option>
+                        @endfor
+                    </select>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">Vencidas</div>
-                        <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ $stats['notas_vencidas'] }}</div>
+                <div class="col-md-3 col-6 w-auto">
+                    <button type="submit" class="btn btn-primary-ed">Filtrar</button>
+                </div>
+            </div>
+        </form>
+        {{-- Cards principais --}}
+        <div class="row g-4 mb-5 mt-2">
+            @foreach ([
+            'Total de Notas' => 'total_notas',
+            'Concluídas' => 'notas_concluidas',
+            'Pendentes' => 'notas_pendentes',
+            'Vencidas' => 'notas_vencidas',
+        ] as $label => $key)
+                <div class="col-sm-6 col-md-3">
+                    <div class="card shadow-sm border-0 text-center">
+                        <div class="card-body hover-shadow rounded-2">
+                            <h6 class="card-title">{{ $label }}</h6>
+                            <h3
+                                class="fw-bold
+                            {{ $key == 'notas_concluidas' ? 'text-success' : '' }}
+                            {{ $key == 'notas_pendentes' ? 'text-warning' : '' }}
+                            {{ $key == 'notas_vencidas' ? 'text-danger' : '' }}
+                            {{ $key == 'total_notas' ? 'text-primary' : '' }}
+                        ">
+                                {{ $stats[$key] ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Gráficos --}}
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <h4 class="card-header">Notas por Categoria</h4>
+                    <div class="card-body">
+                        <canvas id="graficoCategorias"></canvas>
                     </div>
                 </div>
             </div>
 
-            {{-- Gráficos detalhados --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {{-- Notas por Categoria --}}
-                <div class="bg-gray-800/50 p-6 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-white">Notas por Categoria</h3>
-                    <div class="space-y-3">
-                        @foreach($notasPorCategoria as $categoria)
-                            <div class="flex items-center justify-between">
-                                <span class="text-gray-300">{{ $categoria->nome }}</span>
-                                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                                    {{ $categoria->notas_count }}
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                {{-- Notas por Prioridade --}}
-                <div class="bg-gray-800/50 p-6 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-white">Notas por Prioridade</h3>
-                    <div class="space-y-3">
-                        @foreach($notasPorPrioridade as $item)
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="w-2.5 h-2.5 rounded-full mr-2" style="background-color: {{ $item->prioridade->cor }}"></div>
-                                    <span class="text-gray-300">{{ $item->prioridade->nome }}</span>
-                                </div>
-                                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-                                    {{ $item->total }}
-                                </span>
-                            </div>
-                        @endforeach
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <h4 class="card-header">Notas por Prioridade</h4>
+                    <div class="card-body">
+                        <canvas id="graficoPrioridades"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
+
+    {{-- Gráficos --}}
+    <script>
+        const categoriasLabels = @json(array_keys($graficoCategorias->toArray()));
+        const categoriasData = @json(array_values($graficoCategorias->toArray()));
+
+        const prioridadesLabels = @json(array_keys($graficoPrioridades->toArray()));
+        const prioridadesData = @json(array_values($graficoPrioridades->toArray()));
+
+        const ctxCategorias = document.getElementById('graficoCategorias').getContext('2d');
+        const chartCategorias = new Chart(ctxCategorias, {
+            type: 'bar',
+            data: {
+                labels: categoriasLabels,
+                datasets: [{
+                    label: 'Notas por Categoria',
+                    data: categoriasData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        const ctxPrioridades = document.getElementById('graficoPrioridades').getContext('2d');
+        const chartPrioridades = new Chart(ctxPrioridades, {
+            type: 'bar',
+            data: {
+                labels: prioridadesLabels,
+                datasets: [{
+                    label: 'Notas por Prioridade',
+                    data: prioridadesData,
+                    backgroundColor: 'rgba(234, 179, 8, 0.7)',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
 @endsection

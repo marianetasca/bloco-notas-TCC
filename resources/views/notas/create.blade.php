@@ -28,7 +28,7 @@
             </div>
 
             <div class="row g-3"> {{-- para ocupar a mesma linha --}}
-                <div class="col-md-4"> {{-- Categoria--}}
+                <div class="col-md-4"> {{-- Categoria --}}
                     <label for="categoria_id" class="form-label">Categoria</label>
                     <select name="categoria_id" id="categoria_id" class="form-select">
                         @foreach ($categorias as $categoria)
@@ -52,7 +52,10 @@
                     <label for="prioridade_id" class="form-label">Prioridade</label>
                     <select name="prioridade_id" id="prioridade_id" class="form-select" required>
                         @foreach ($prioridades as $prioridade)
-                            <option value="{{ $prioridade->id }}">{{ $prioridade->nome }}</option>
+                            <option value="{{ $prioridade->id }}"
+                                {{ old('prioridade_id') == $prioridade->id ? 'selected' : '' }}>
+                                {{ $prioridade->nome }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -72,6 +75,7 @@
 
 
             <div class="mt-4 text-end">
+                <a href="{{ route('notas.index') }}"class="btn btn-secondary px-3">Voltar</a>
                 <button type="submit" class="btn btn-primary-ed">Criar Nota</button>
             </div>
         </form>

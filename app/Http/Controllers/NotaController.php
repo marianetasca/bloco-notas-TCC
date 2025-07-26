@@ -13,11 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class NotaController extends Controller
 {
-    public function anexos(Nota $nota)
-    {
-        return view('notas.anexos', compact('nota'));
-    }
-
     public function index(Request $request)
     {
         $notasExcluidasCount = Nota::onlyTrashed()
@@ -98,6 +93,7 @@ class NotaController extends Controller
         return view('notas.index', compact('notas', 'categorias', 'tags', 'prioridades', 'notasPorPrioridade', 'notasExcluidasCount'));
     }
 
+    /*======== Método create ========*/
     public function create()
     {
         $categorias = Categoria::where('user_id', auth()->id())->get();
@@ -107,6 +103,7 @@ class NotaController extends Controller
         return view('notas.create', compact('categorias', 'tags', 'prioridades'));
     }
 
+    /*======== Método show ========*/
     // Mostrar a página de detalhes da nota com as tags associadas
     public function show($id)
     {
@@ -115,6 +112,7 @@ class NotaController extends Controller
         return view('notas.show', compact('nota'));
     }
 
+    /*======== Método store ========*/
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -129,6 +127,7 @@ class NotaController extends Controller
             'anexos.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
+        // Esse trecho cria a nota no banco com os dados validados, e também associa a nota ao usuário autenticado.
         $nota = Nota::create([
             'titulo' => $validated['titulo'],
             'conteudo' => $validated['conteudo'],
@@ -157,11 +156,9 @@ class NotaController extends Controller
         return redirect()->route('notas.index')->with('success', 'Nota criada com sucesso!');
     }
 
+    /*======== Método update ========*/
     public function update(Request $request, Nota $nota)
     {
-        // Adicione este log para debug
-        Log::info('Método update chamado', ['request' => $request->all()]);
-
         // Verifica permissão
         if ($nota->user_id !== auth()->id()) {
             abort(403);
@@ -211,19 +208,7 @@ class NotaController extends Controller
         return redirect()->route('notas.index')->with('success', 'Nota atualizada com sucesso!');
     }
 
-    public function destroy(Nota $nota)
-    {
-        if ($nota->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $nota->delete();
-
-        return redirect()
-            ->route('notas.index')
-            ->with('success', 'Nota movida para a lixeira.');
-    }
-
+    /*======== Método compete ========*/
     public function complete($id)
     {
         $nota = Nota::findOrFail($id);
@@ -240,6 +225,7 @@ class NotaController extends Controller
             ->with('success', $nota->concluido ? 'Nota marcada como concluída!' : 'Nota marcada como pendente!');
     }
 
+    /*======== Método edit ========*/
     public function edit(Nota $nota)
     {
         if ($nota->user_id !== auth()->id()) {
@@ -253,6 +239,13 @@ class NotaController extends Controller
         return view('notas.edit', compact('nota', 'categorias', 'tags', 'prioridades'));
     }
 
+    /*======== Método Anexo ========*/
+        public function anexos(Nota $nota)
+    {
+        return view('notas.anexos', compact('nota'));
+    }
+
+    /*======== Método destoyAnexo ========*/
     public function destroyAnexo(Nota $nota, Anexo $anexo)
     {
         try {
@@ -264,6 +257,21 @@ class NotaController extends Controller
         }
     }
 
+    /*======== Método destroy ========*/
+    public function destroy(Nota $nota)
+    {
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $nota->delete();
+
+        return redirect()
+            ->route('notas.index')
+            ->with('success', 'Nota movida para a lixeira.');
+    }
+
+    /*======== Método lixeira ========*/
     public function lixeira()
     {
         $notasExcluidas = Nota::onlyTrashed()
@@ -275,6 +283,7 @@ class NotaController extends Controller
         return view('notas.lixeira', compact('notasExcluidas'));
     }
 
+    /*======== Método restaurar ========*/
     public function restaurar($id)
     {
         $nota = Nota::onlyTrashed()
@@ -288,6 +297,7 @@ class NotaController extends Controller
             ->with('success', 'Nota restaurada com sucesso!');
     }
 
+    /*======== Método excluirPermanentemente ========*/
     public function excluirPermanente($id)
     {
         $nota = Nota::onlyTrashed()

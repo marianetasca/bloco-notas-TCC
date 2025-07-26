@@ -211,6 +211,17 @@ body.dark .navbar {
     color: white;
 }
 
+.btn-primary-ed2 {
+    background-color: #0969ae;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary-ed2:hover {
+    background-color: #04538c;
+    color: white;
+}
+
 /*======== notas.create.blade ========*/
 
 /*======== notas.index.blade ========*/
@@ -225,50 +236,22 @@ body.dark .navbar {
     box-shadow: 0 2px 8px rgba(238, 90, 82, 0.3);
 }
 
-.bg-baixo {
-    background-color: #3f92cd;
-    border: #004c83;
+.hover-shadow {
+    transition: box-shadow 0.3s ease;
 }
 
-.bg-medio {
-    background-color: rgb(255, 255, 133);
-    border: rgb(255, 255, 0);
+.hover-shadow:hover {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.35);
 }
 
-.bg-alto {
-    background-color: #ea5c5c;
-    border: #6041dc;
+.bg-warning-ed {
+    background-color: #f6a700;
 }
-
-/*
-.btn-secondary {
-    background-color: #e5e7eb;
-    color: #374151;
-    padding: 10px 18px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
+.text-warning-ed {
+    color: #f6a700;
 }
-
-.btn-secondary:hover {
-    background-color: #d1d5db;
+.border-warning-ed {
+    border: 1px solid #f6a700;
 }
-
-.badge {
-    background-color: #dc2626;
-    color: white;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: 6px;
-}
-
-
-.spacing-top {
-    margin-top: 24px;
-} */
 /*======== notas.index.blade ========*/
 

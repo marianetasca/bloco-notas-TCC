@@ -14,12 +14,6 @@
             </div>
         @endif
 
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <!-- Formulário aqui -->
-            </div>
-        </div>
-
         <form method="POST" action="{{ route('notas.update', $nota->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -37,15 +31,15 @@
                 <textarea name="conteudo" id="conteudo" class="form-control" rows="4" required>{{ old('conteudo', $nota->conteudo) }}</textarea>
             </div>
 
-            <div class="row g-3"> {{-- para ocupar a mesma linha --}}
+            <div class="row g-4"> {{-- para ocupar a mesma linha --}}
                 {{-- categoria --}}
-                <div class="col-md-4">
+                <div class="col-md-4 w-auto">
                     <label for="categoria_id" class="form-label">Categoria</label>
                     <select name="categoria_id" id="categoria_id" class="form-select" required>
                         <option value="">Selecione uma categoria</option>
                         @foreach ($categorias as $categoria)
                             <option value="{{ $categoria->id }}"
-                                {{ $nota->categoria_id == $categoria->id ? 'selected' : '' }}>
+                                {{ old('categoria_id', $nota->categoria_id) == $categoria->id ? 'selected' : '' }}>
                                 {{ $categoria->nome }}
                             </option>
                         @endforeach
@@ -53,17 +47,16 @@
                 </div>
 
                 {{-- data --}}
-                <div class="col-md-4">
-                    <label for="data_vencimento" class="form-label">Data da Nota</label>
+                <div class="col-md-4 w-auto">
+                    <label for="data_vencimento" class="form-label">Data de vencimento</label>
                     <input type="date" name="data_vencimento" id="data_vencimento" class="form-control"
                         value="{{ old('data_vencimento', \Carbon\Carbon::parse($nota->data_vencimento)->format('Y-m-d')) }}">
                 </div>
 
                 {{-- prioridades --}}
-                <div class="col-md-4">
+                <div class="col-md-4 w-auto">
                     <label for="prioridade" class="form-label">Prioridade</label>
-                    <label for="prioridade_id">Prioridade:</label>
-                    <select name="prioridade_id" id="prioridade_id" class="form-control" required>
+                    <select name="prioridade_id" id="prioridade_id" class="form-select" required>
                         @foreach ($prioridades as $prioridade)
                             <option value="{{ $prioridade->id }}"
                                 {{ old('prioridade_id', $nota->prioridade_id) == $prioridade->id ? 'selected' : '' }}>
@@ -96,7 +89,8 @@
             </div>
 
 
-            <div class="mt-4 text-end">
+            <div class="text-end">
+                <a href="{{ route('notas.index') }}" class="btn btn-secondary px-3">Voltar</a>
                 <button type="submit" class="btn btn-primary-ed">
                     Atualizar Nota
                 </button>

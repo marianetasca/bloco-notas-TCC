@@ -35,7 +35,7 @@
 
                 <!-- Área do usuário -->
 
-                <div class="user-info d-flex align-items-center gap-3">
+                <div class="user-info d-flex align-items-center gap-2">
                     <span class="user-name">{{ Auth::user()->name }}</span>
                     <a href="{{ route('profile.edit') }}" class="btn btn-primary user-link">Perfil</a>
                     <form method="POST" action="{{ route('logout') }}">

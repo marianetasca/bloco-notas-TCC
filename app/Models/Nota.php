@@ -22,6 +22,7 @@ class Nota extends Model
 
     protected $casts = [
         'data_vencimento' => 'date',
+        'deleted_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -60,14 +61,14 @@ class Nota extends Model
 
     public function isAtrasada()
     {
-        return $this->data_entrega && $this->data_entrega->isPast();
+        return $this->data_vencimento && $this->data_vencimento->isPast();
     }
 
-    public function isPróximaDoVencimento()
+    public function isProximaDoVencimento()
     {
-        if (!$this->data_entrega) return false;
-        $diasParaVencer = now()->diffInDays($this->data_entrega, false);
-        return $diasParaVencer >= 0 && $diasParaVencer <= 3;
+        if (!$this->data_vencimento) return false;
+        $dias = now()->diffInDays($this->data_vencimento, false);
+        return $dias >= 0 && $dias <= 3;
     }
 
     public function anexos()
