@@ -14,6 +14,9 @@ body.dark .page-header {
 }
 /*======== profile.blade ========*/
 
+.collapse {
+        transition: all 0.3s ease;
+    }
 /*======== navigation.blade ========*/
 
 /* Modo escuro */
@@ -246,6 +249,23 @@ body.dark .navbar {
 
 .bg-warning-ed {
     background-color: #f6a700;
+}
+.btn-warning-ed {
+    background-color: #eaad29;
+    color: white;
+}
+.btn-warning-ed:hover {
+    background-color: #d89e21;
+    color: white;
+}
+.bg-orange {
+    background-color: orangered;
+}
+.border-orange {
+    border: 1px solid orangered;
+}
+.text-orange {
+    color: orangered;
 }
 .text-warning-ed {
     color: #f6a700;

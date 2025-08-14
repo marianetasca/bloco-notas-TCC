@@ -16,41 +16,40 @@ require __DIR__ . '/auth.php';
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard
-    Route::get('/dashboard',[DashboardController::class, 'index'])
+    Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
     // Profile
-    Route::get('/profile',[ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile',[ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile',[ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rotas custom de Notas (devem vir antes do resource)
     Route::get('/notas/lixeira', [NotaController::class, 'lixeira'])
         ->name('notas.lixeira');
 
     Route::post('/notas/lixeira/{nota}/restaurar', [NotaController::class, 'restaurar'])
-         ->withTrashed()
-         ->name('notas.restaurar');
+        ->withTrashed()
+        ->name('notas.restaurar');
 
     Route::delete('/notas/lixeira/{nota}/excluir-permanente', [NotaController::class, 'excluirPermanente'])
-         ->withTrashed()
-         ->name('notas.excluir-permanente');
+        ->withTrashed()
+        ->name('notas.excluir-permanente');
 
-    Route::post('/notas/{nota}/complete',[NotaController::class, 'complete'])
+    Route::post('/notas/{nota}/complete', [NotaController::class, 'complete'])
         ->name('notas.complete');
 
-    Route::get('/notas/{nota}/anexos',[NotaController::class, 'anexos'])
-        ->name('notas.anexos');
+    Route::post('/notas/{nota}/concluido', [NotaController::class, 'concluido'])
+        ->name('notas.concluido');
 
-    // Upload de anexos (separado de prefixo notas)
-    Route::post('/anexos/upload',[AnexoController::class, 'Anexo'])
-        ->name('anexos.upload');
+    // Upload e remoção via Dropzone
+    Route::post('/anexos/upload', [AnexoController::class, 'upload'])->name('anexos.upload');
+    Route::delete('/anexos/{anexo}', [AnexoController::class, 'remove'])->name('anexos.remove');    // Limpeza de anexos temporários
+    Route::delete('/anexos/limpar-temporarios', [AnexoController::class, 'limparTemporarios'])->name('anexos.limpar-temporarios');
+    // Exclusão de anexo específico de uma nota
+    Route::delete('/notas/{nota}/anexos/{anexo}', [AnexoController::class, 'destroy'])->name('anexos.destroy');
 
-    // Excluir anexo de nota
-    Route::delete('/notas/{nota}/anexos/{anexo}',[AnexoController::class, 'destroy'])
-        ->name('notas.anexos.destroy');
-
-    // Resource “notas” — agora sem conflitos de URI
+    // Resource notas
     Route::resource('notas', NotaController::class);
 
     // Outros resources

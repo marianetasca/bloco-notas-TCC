@@ -8,11 +8,17 @@ use App\Models\Nota;
 use App\Models\Prioridade;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;  // Adicione esta linha
 use Illuminate\Support\Facades\Storage;
 
 class NotaController extends Controller
 {
+    protected $anexoController;
+
+    public function __construct()
+    {
+        $this->anexoController = new AnexoController();
+    }
+
     public function index(Request $request)
     {
         $notasExcluidasCount = Nota::onlyTrashed()
@@ -107,8 +113,13 @@ class NotaController extends Controller
     // Mostrar a página de detalhes da nota com as tags associadas
     public function show($id)
     {
-        // Usando findOrFail para buscar a nota ou retornar erro 404
-        $nota = Nota::with(['categoria', 'prioridade', 'tags'])->findOrFail($id);
+        $nota = Nota::with(['categoria', 'prioridade', 'tags', 'anexos'])->findOrFail($id);
+
+        // Verifica permissão
+        if ($nota->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         return view('notas.show', compact('nota'));
     }
 
@@ -116,18 +127,18 @@ class NotaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
+            'titulo' => 'required|string|max:150',
             'conteudo' => 'required|string',
             'categoria_id' => 'required|exists:categorias,id',
-            'data_vencimento' => 'required|date',
+            'data_vencimento' => 'nullable|date',
             'prioridade_id' => 'required|exists:prioridades,id',
             'tags' => 'array|nullable',
             'tags.*' => 'exists:tags,id',
-            'anexos' => 'array|nullable',
-            'anexos.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'anexos_temp' => 'array|nullable', // IDs dos anexos temporários
+            'anexos_temp.*' => 'integer'
         ]);
 
-        // Esse trecho cria a nota no banco com os dados validados, e também associa a nota ao usuário autenticado.
+        // Cria a nota no banco com os dados validados
         $nota = Nota::create([
             'titulo' => $validated['titulo'],
             'conteudo' => $validated['conteudo'],
@@ -137,20 +148,14 @@ class NotaController extends Controller
             'user_id' => auth()->id()
         ]);
 
+        // Associar tags se existirem
         if (!empty($validated['tags'])) {
             $nota->tags()->attach($validated['tags']);
         }
 
-        if ($request->hasFile('anexos')) {
-            foreach ($request->file('anexos') as $arquivo) {
-                $caminho = $arquivo->store('anexos/' . auth()->id(), 'public');
-                $nota->anexos()->create([
-                    'nome_original' => $arquivo->getClientOriginalName(),
-                    'caminho' => $caminho,
-                    'tipo_mime' => $arquivo->getMimeType(),
-                    'tamanho' => $arquivo->getSize(),
-                ]);
-            }
+        // Associar anexos temporários à nota criada usando o AnexoController
+        if (!empty($validated['anexos_temp'])) {
+            $this->anexoController->associarANota($nota->id, $validated['anexos_temp']);
         }
 
         return redirect()->route('notas.index')->with('success', 'Nota criada com sucesso!');
@@ -166,14 +171,17 @@ class NotaController extends Controller
 
         // Validação
         $validated = $request->validate([
-            'titulo' => 'required|string|max:255',
+            'titulo' => 'required|string|max:150',
             'conteudo' => 'required|string',
             'categoria_id' => 'required|exists:categorias,id',
             'prioridade_id' => 'required|exists:prioridades,id',
-            'data_vencimento' => $validated['data_vencimento'] ?? null,
+            'data_vencimento' => 'nullable|date',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
-            'anexos.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120'  // 5MB
+            'anexos_temp' => 'array|nullable',
+            'anexos_temp.*' => 'integer',
+            'anexos_removidos' => 'array|nullable', // IDs dos anexos a serem removidos
+            'anexos_removidos.*' => 'integer'
         ]);
 
         // Atualiza a nota
@@ -192,24 +200,21 @@ class NotaController extends Controller
             $nota->tags()->detach();
         }
 
-        // Processa os anexos
-        if ($request->hasFile('anexos')) {
-            foreach ($request->file('anexos') as $anexo) {
-                $path = $anexo->store('anexos', 'public');
-                $nota->anexos()->create([
-                    'nome_original' => $anexo->getClientOriginalName(),
-                    'caminho' => $path,
-                    'tipo' => $anexo->getClientMimeType(),
-                    'tamanho' => $anexo->getSize(),
-                ]);
-            }
+        // Remove anexos marcados para remoção usando o AnexoController
+        if (!empty($validated['anexos_removidos'])) {
+            $this->anexoController->removerAnexosIds($validated['anexos_removidos'], $nota->id);
+        }
+
+        // Associar novos anexos temporários à nota usando o AnexoController
+        if (!empty($validated['anexos_temp'])) {
+            $this->anexoController->associarANota($nota->id, $validated['anexos_temp']);
         }
 
         return redirect()->route('notas.index')->with('success', 'Nota atualizada com sucesso!');
     }
 
-    /*======== Método compete ========*/
-    public function complete($id)
+    /*======== Método concluido ========*/
+    public function concluido($id)
     {
         $nota = Nota::findOrFail($id);
 
@@ -218,6 +223,10 @@ class NotaController extends Controller
         }
 
         $nota->concluido = !$nota->concluido;
+
+        // Se marcou como concluída, salva o timestamp
+        $nota->completed_at = $nota->concluido ? now() : null;
+
         $nota->save();
 
         return redirect()
@@ -237,24 +246,6 @@ class NotaController extends Controller
         $prioridades = Prioridade::orderBy('nivel')->get();
 
         return view('notas.edit', compact('nota', 'categorias', 'tags', 'prioridades'));
-    }
-
-    /*======== Método Anexo ========*/
-        public function anexos(Nota $nota)
-    {
-        return view('notas.anexos', compact('nota'));
-    }
-
-    /*======== Método destoyAnexo ========*/
-    public function destroyAnexo(Nota $nota, Anexo $anexo)
-    {
-        try {
-            Storage::disk('public')->delete($anexo->caminho);
-            $anexo->delete();
-            return back()->with('success', 'Anexo removido com sucesso!');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao remover anexo.');
-        }
     }
 
     /*======== Método destroy ========*/
@@ -309,7 +300,7 @@ class NotaController extends Controller
             Storage::disk('public')->delete($anexo->caminho);
             $anexo->delete();
         }
-        //Percorre todos os anexos e os exclui tanto do disco quanto do banco
+
         $nota->forceDelete();
 
         return redirect()

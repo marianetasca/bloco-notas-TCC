@@ -30,7 +30,7 @@
                                         Excluída em: {{ $nota->deleted_at->format('d/m/Y H:i') }}
                                     </p>
                                     <p class="text-danger small mb-2">
-                                        Será excluída permanentemente em: {{ $nota->deleted_at->addDays(1)->format('d/m/Y') }}
+                                        Será excluída permanentemente em: {{ $nota->deleted_at->addDays(30)->format('d/m/Y') }}
                                     </p>
                                     <p class="card-text text-muted">{{ Str::limit($nota->conteudo, 100) }}</p>
 

@@ -2,11 +2,6 @@
 
 @section('slot')
     <div class="container py-5">
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
         <div class="card shadow rounded-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="h4 textColor">Editar Categoria</h2>

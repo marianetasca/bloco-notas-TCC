@@ -2,12 +2,6 @@
 
 @section('slot')
     <div class="container mt-5">
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="card shadow-sm">
             <div class="card-header textColor">
                 <h4 class="mb-0">Nova Tag</h4>

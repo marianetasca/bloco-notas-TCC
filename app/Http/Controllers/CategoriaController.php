@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;//para validação do nome das tags
+use Illuminate\Validation\Rule;
+//para validação do nome das tags
 
 use App\Models\Categoria;
 
@@ -27,9 +28,8 @@ class CategoriaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nome' => 'required|string|max:255|unique:categorias,nome',
-            Rule::unique('categorias')->where(function ($query) {
-                return $query->where('user_id', auth()->id());}),
+            'nome' => 'required|string|max:255|unique:categorias,nome,NULL,id,user_id,' . auth()->id(),
+
         ]);
 
         Categoria::create([
@@ -64,14 +64,12 @@ class CategoriaController extends Controller
 
         //Validação dos dados para não haver duplicatas
         $validated = $request->validate([
-            'nome' => 'required|string|max:255|unique:categorias,nome,' . $categoria->id, //. $categoria->id serve para que se o usuario atualizar para o mesmo nome que estava nao der erro
-            Rule::unique('categorias')->ignore($categoria->id)->where(function ($query) {
-                return $query->where('user_id', auth()->id());
-            }),
+            'nome' => 'required|string|max:255|unique:categorias,nome,' . $categoria->id . ',id,user_id,' . auth()->id(),
         ]);
 
         // Atualiza a categoria
-        $categoria->update(['nome' => $validated['nome']]);
+        $categoria->update([
+            'nome' => $validated['nome']]);
 
         return redirect()->route('categorias.index')
             ->with('success', 'Categoria atualizada com sucesso!');
@@ -87,5 +85,4 @@ class CategoriaController extends Controller
         $categoria->delete();
         return redirect()->route('categorias.index')->with('success', 'Categoria excluída com sucesso!');
     }
-
 }

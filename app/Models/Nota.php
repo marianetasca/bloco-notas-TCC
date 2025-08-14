@@ -17,15 +17,20 @@ class Nota extends Model
         'prioridade_id',
         'data_vencimento',
         'user_id',
+        'concluido',
         'completed_at'
     ];
 
     protected $casts = [
-        'data_vencimento' => 'date',
+        'data_vencimento' => 'datetime',
         'deleted_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'concluido' => 'boolean', //para garantir que seja boolean
+
     ];
+
 
     /**
      * Relacionamento: A nota pertence a um usuário.
@@ -59,20 +64,59 @@ class Nota extends Model
         return $this->belongsTo(Prioridade::class);
     }
 
-    public function isAtrasada()
+    public function diasRestantes()
     {
-        return $this->data_vencimento && $this->data_vencimento->isPast();
+        return now()->diffInDays($this->data_vencimento, false);
     }
 
-    public function isProximaDoVencimento()
-    {
-        if (!$this->data_vencimento) return false;
-        $dias = now()->diffInDays($this->data_vencimento, false);
-        return $dias >= 0 && $dias <= 3;
-    }
 
     public function anexos()
     {
         return $this->hasMany(Anexo::class);
+    }
+
+    public function tempoDesdeConclusao(): ?string
+    {
+        if (! $this->completed_at instanceof \Carbon\Carbon) {
+            return null;
+        }
+
+
+        $dias = now()->diffInDays($this->completed_at, false);
+
+        return match (true) {
+            $dias == 0 => 'Concluída hoje',
+            $dias == 1 => 'Concluída há 1 dia',
+            default     => "Concluída há {$dias} dias",
+        };
+    }
+
+        //   Verifica se a nota tem anexos.
+
+    public function hasAnexos()
+    {
+        return $this->anexos()->count() > 0;
+    }
+
+    /**
+     * Conta total de anexos.
+     */
+    public function getTotalAnexosAttribute()
+    {
+        return $this->anexos()->count();
+    }
+
+
+    public function scopeComAnexos($query)
+    {
+        return $query->has('anexos');
+    }
+
+    /**
+     * Scope para notas sem anexos.
+     */
+    public function scopeSemAnexos($query)
+    {
+        return $query->doesntHave('anexos');
     }
 }

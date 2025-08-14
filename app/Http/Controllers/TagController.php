@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;//para validação do nome das tags
+use Illuminate\Validation\Rule; //para validação do nome das tags
 use App\Models\Tag;
 
 
@@ -25,9 +25,7 @@ class TagController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nome' => 'required|string|max:255|unique:tags,nome',
-            Rule::unique('tags')->where(function ($query) {
-                return $query->where('user_id', auth()->id());}),
+            'nome' => 'required|string|max:255|unique:tags,nome,NULL,id,user_id,' . auth()->id(),
         ]);
 
         Tag::create([
@@ -41,6 +39,7 @@ class TagController extends Controller
     /*======== Método edit ========*/
     public function edit(Tag $tag)
     {
+        $notas = $tag->notas ?? [];// Recupera as notas que pertencem a essa tag
         return view('tags.edit', compact('tag'));
     }
 
@@ -49,14 +48,13 @@ class TagController extends Controller
     {
         //Validação para não haver duplicatas
         $validated = $request->validate([
-            'nome' => 'required|string|max:255|unique:tags,nome,' . $tag->id, //. $tag->id serve para que se o usuario atualizar para o mesmo nome que estava nao der erro
-            Rule::unique('tags')->ignore($tag->id)->where(function ($query) {
-                return $query->where('user_id', auth()->id());
-            }),
+            'nome' => 'required|string|max:255|unique:tags,nome,' . $tag->id . ',id,user_id,' . auth()->id(),
+
         ]);
 
         $tag->update([
             'nome' => $validated['nome']
+
         ]);
 
         return redirect()->route('tags.index')->with('success', 'Tag atualizada com sucesso!');
