@@ -1,6 +1,18 @@
 @extends('layouts.guest')
 
 @section('slot')
+    <!-- exibi erros de validação -->
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>Erro na validação:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 
@@ -10,8 +22,8 @@
         <!-- Email -->
         <div class="mb-3">
             <label for="email" class="form-label">{{ __('Email') }}</label>
-            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus
-                autocomplete="username" class="form-control @error('email') is-invalid @enderror">
+            <input id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required
+                autofocus autocomplete="username" class="form-control @error('email') is-invalid @enderror">
 
             @error('email')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -31,9 +43,6 @@
                     <i class="bi bi-eye text-muted toggle-icon"></i>
                 </button>
             </div>
-            @error('password')
-                <div class="invalid-feedback d-block">{{ $message }}</div>
-            @enderror
         </div>
 
         <!-- Confirmar senha -->
@@ -53,6 +62,17 @@
             @error('password_confirmation')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
+        </div>
+
+        <div class="mt-2">
+            <small class="text-muted">Requisitos da senha:</small>
+            <ul class="" style="font-size: 0.85em;">
+                <li id="minlength" class="text-danger">Pelo menos 8 caracteres</li>
+                <li id="lowercase" class="text-danger">Pelo menos uma letra minúscula</li>
+                <li id="uppercase" class="text-danger">Pelo menos uma letra maiúscula</li>
+                <li id="number" class="text-danger">Pelo menos um número</li>
+                <li id="symbol" class="text-danger">Pelo menos um símbolo (@$!%*#?&)</li>
+            </ul>
         </div>
 
         <!-- Botão -->

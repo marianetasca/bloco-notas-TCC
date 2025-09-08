@@ -70,15 +70,15 @@
             </div>
 
             <div class="mt-2">
-            <small class="text-muted">Requisitos da senha:</small>
-            <ul class="" style="font-size: 0.85em;">
-                <li id="minlength" class="text-danger">Pelo menos 8 caracteres</li>
-                <li id="lowercase" class="text-danger">Pelo menos uma letra minúscula</li>
-                <li id="uppercase" class="text-danger">Pelo menos uma letra maiúscula</li>
-                <li id="number" class="text-danger">Pelo menos um número</li>
-                <li id="symbol" class="text-danger">Pelo menos um símbolo (@$!%*#?&)</li>
-            </ul>
-        </div>
+                <small class="text-muted">Requisitos da senha:</small>
+                <ul class="" style="font-size: 0.85em;">
+                    <li id="minlength" class="text-danger">Pelo menos 8 caracteres</li>
+                    <li id="lowercase" class="text-danger">Pelo menos uma letra minúscula</li>
+                    <li id="uppercase" class="text-danger">Pelo menos uma letra maiúscula</li>
+                    <li id="number" class="text-danger">Pelo menos um número</li>
+                    <li id="symbol" class="text-danger">Pelo menos um símbolo (@$!%*#?&)</li>
+                </ul>
+            </div>
 
             <!-- Links e Botão -->
             <div class="d-flex justify-content-between align-items-center">

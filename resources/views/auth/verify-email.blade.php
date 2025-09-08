@@ -1,4 +1,4 @@
-{{-- @extends('layouts.guest')
+@extends('layouts.guest')
 
 @section('slot')
     <div class="mb-4 text-muted">
@@ -28,4 +28,4 @@
             </button>
         </form>
     </div>
-@endsection --}}
+@endsection 

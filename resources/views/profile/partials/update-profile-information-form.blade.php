@@ -33,7 +33,7 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
 
-            {{-- @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
+            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
                 <div class="mt-2 text-secondary small">
                     {{ __('Seu e-mail ainda não foi verificado.') }}
                     <button form="send-verification" class="btn btn-link p-0 m-0 align-baseline">
@@ -46,7 +46,7 @@
                         </div>
                     @endif
                 </div>
-            @endif --}}
+            @endif 
         </div>
 
         <div class="d-flex justify-content-end gap-3">
