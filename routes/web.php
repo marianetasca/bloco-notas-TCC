@@ -14,7 +14,10 @@ Route::get('/', fn() => redirect()->route('login'));
 // Autenticação Breeze
 require __DIR__ . '/auth.php';
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/only-verified', function () {
+        return view('only-verified');
+    })->middleware(['auth', 'verified']);
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');

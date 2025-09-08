@@ -6,7 +6,7 @@
         {{-- Cabeçalho --}}
         <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
             <h2 class="mb-0 textColor">Minhas Notas</h2>
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 mt-2 mt-sm-0 flex-wrap">
                 <a href="{{ route('notas.lixeira') }}" class="btn btn-outline-danger position-relative">
                     <i class="bi bi-trash"></i> Lixeira
                     @if ($notasExcluidasCount > 0)
@@ -128,16 +128,19 @@
                         <small class="text-muted">Criada em:
                             {{ $nota->created_at->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</small>
 
-                        {{-- Conteúdo da nota (inicialmente resumido) --}}
+                        {{-- Versão resumida --}}
                         <div class="conteudo-nota mt-3">
+                            {{-- CSS limitando altura --}}
                             <div class="conteudo-resumido" id="resumido{{ $nota->id }}">
-                                <p class="card-text" style="max-height: 4.5em; overflow: hidden;">
-                                    {!! nl2br(e(Str::limit($nota->conteudo, 200))) !!}
-                                </p>
+                                <div class="conteudo-truncado text-truncate ">
+                                    {!! $nota->conteudo !!}
+                                </div>
                             </div>
 
                             <div class="conteudo-completo d-none" id="conteudoCompleto{{ $nota->id }}">
-                                <p class="card-text">{!! nl2br(e($nota->conteudo)) !!}</p>
+                                <div class="">
+                                    {!! $nota->conteudo !!}
+                                </div>
                             </div>
 
                             {{-- Botão único para alternar visualização --}}
@@ -233,7 +236,7 @@
                             </div>
                         @endif
 
-                        {{-- Anexos com Preview Simples --}}
+                        {{-- Anexos com preview simples --}}
                         @if ($nota->anexos->count() > 0)
                             <div class="mb-3">
                                 <div class="d-flex align-items-center mb-2">
@@ -474,42 +477,37 @@
             const isShowing = extras[0] && !extras[0].classList.contains('d-none');
             btn.textContent = isShowing ? 'Ver menos anexos' : 'Ver mais anexos';
         }
+
+        // DE VOLTA AO TOPO
+        document.addEventListener("DOMContentLoaded", function() {
+            const btn = document.getElementById("backToTop");
+            const showAt = 300; // px: quando o botão aparece
+
+            function toggleBtn() {
+                if (window.scrollY > showAt) {
+                    btn.classList.remove("d-none");
+                } else {
+                    btn.classList.add("d-none");
+                }
+            }
+
+            // Atualiza estado ao carregar e ao rolar
+            toggleBtn();
+            window.addEventListener("scroll", toggleBtn, {
+                passive: true
+            });
+
+            // Rola para o topo (respeitando prefers-reduced-motion)
+            btn.addEventListener("click", function() {
+                const prefersReduced = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)"
+                ).matches;
+                window.scrollTo({
+                    top: 0,
+                    behavior: prefersReduced ? "auto" : "smooth",
+                });
+            });
+        });
     </script>
-
-    <style>
-        .conteudo-nota {
-            transition: all 0.3s ease;
-        }
-
-        .anexo-card {
-            transition: all 0.2s ease;
-            background: white;
-        }
-
-        .anexo-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .img-preview {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .img-preview:hover {
-            transform: scale(1.05);
-        }
-
-        .toggle-btn {
-            transition: all 0.2s ease;
-        }
-
-        .toggle-btn:hover {
-            transform: translateY(-1px);
-        }
-    </style>
 
 @endsection

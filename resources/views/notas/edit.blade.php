@@ -13,7 +13,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('notas.update', $nota->id) }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('notas.update', $nota->id) }}" enctype="multipart/form-data" id="formNota">
             @csrf
             @method('PUT')
 
@@ -27,7 +27,8 @@
             {{-- conteudo --}}
             <div class="mb-3">
                 <label for="conteudo" class="form-label">Conteúdo</label>
-                <textarea name="conteudo" id="conteudo" class="form-control" rows="4" required>{{ old('conteudo', $nota->conteudo) }}</textarea>
+                <div id="editor" style="min-height: 200px;" class="bg-white"></div>
+                <textarea name="conteudo" id="conteudo" style="display: none;" required>{{ old('conteudo', $nota->conteudo) }}</textarea>
             </div>
 
             <div class="row g-3"> {{-- para ocupar a mesma linha --}}
@@ -155,12 +156,50 @@
     </div>
 
 @endsection
-{{-- Dropzone --}}
+
 @push('scripts')
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            Dropzone.autoDiscover = false;
+            // ===== CONFIGURAÇÃO DO QUILL =====
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                placeholder: 'Digite o conteúdo da nota...',
+                modules: {
+                    toolbar: [
+                        [{'font': []}],
+                        [{'size': ['small', false, 'large', 'huge']}], // custom dropdown
+                        ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+                        [{'color': []}, {'background': []}], // dropdown with defaults from theme
+                        [{'header': 1}, {'header': 2}], // custom button values
+                        [{'align': []}],
+                        [{'list': 'ordered'}, {'list': 'bullet'}, {'list': 'check'}],
+                        [{'script': 'sub'}, {'script': 'super'}], // superscript/subscript
+                        [{'indent': '-1'}, {'indent': '+1'}], // outdent/indent
+                        [{'direction': 'rtl'}], // text direction
+                        ['blockquote', 'code-block'],
+                        ['link'],
+                        ['clean'] // remove formatting button
+                    ]
+                }
+            });
+            const conteudoExistente = document.getElementById('conteudo').value;
+            if (conteudoExistente) {
+                quill.root.innerHTML = conteudoExistente;
+            }
 
+            // Sincronizar com textarea
+            quill.on('text-change', function() {
+                document.getElementById('conteudo').value = quill.root.innerHTML;
+            });
+
+            // Antes do envio
+            document.getElementById('formNota').addEventListener('submit', function() {
+                document.getElementById('conteudo').value = quill.root.innerHTML;
+            });
+
+            // ======== DROPZONE ========
+            Dropzone.autoDiscover = false;
             let novosAnexos = [];
             let anexosRemovidos = [];
 

@@ -13,8 +13,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('notas.store') }}" enctype="multipart/form-data">
-            @csrf
+        <form method="POST" action="{{ route('notas.store') }}" enctype="multipart/form-data" id="formNota"> @csrf
 
             <div class="mb-3">
                 <label for="titulo" class="form-label">Título</label>
@@ -23,7 +22,8 @@
 
             <div class="mb-3">
                 <label for="conteudo" class="form-label">Conteúdo</label>
-                <textarea name="conteudo" id="conteudo" rows="4" class="form-control" required></textarea>
+                <div id="editor" style="min-height: 200px;" class="bg-white" class="te"></div>
+                <textarea name="conteudo" id="conteudo" style="display: none;" required></textarea>
             </div>
 
             <div class="row g-3"> {{-- para ocupar a mesma linha --}}
@@ -110,15 +110,60 @@
     </div>
 @endsection
 
-<!-- Dropzone CSS -->
+
 @push('scripts')
+    <!-- Quill.js -->
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ===== CONFIGURAÇÃO DO QUILL =====
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                placeholder: 'Digite o conteúdo da nota...',
+                modules: {
+                    toolbar: [
+                        [{'font': []}],
+                        [{'size': ['small', false, 'large', 'huge']}], // custom dropdown
+                        ['bold', 'italic', 'underline', 'strike'], // toggled buttons
+                        [{'color': []}, {'background': []}], // dropdown with defaults from theme
+                        [{'header': 1}, {'header': 2}], // custom button values
+                        [{'align': []}],
+                        [{'list': 'ordered'}, {'list': 'bullet'}, {'list': 'check'}],
+                        [{'script': 'sub'}, {'script': 'super'}], // superscript/subscript
+                        [{'indent': '-1'}, {'indent': '+1'}], // outdent/indent
+                        [{'direction': 'rtl'}], // text direction
+                        ['blockquote', 'code-block'],
+                        ['link'],
+                        ['clean'] // remove formatting button
+                    ]
+                }
+            });
+
+            // Exemplo de conteúdo inicial (remova se não quiser)
+            // const Delta = Quill.import('delta');
+            // quill.setContents(
+            //     new Delta()
+            //         .insert('Exemplo de código JavaScript:')
+            //         .insert('\n', { 'code-block': 'javascript' })
+            //         .insert('console.log("Hello World!");')
+            //         .insert('\n', { 'code-block': 'javascript' })
+            // );
+
+            // Sincronizar conteúdo do Quill com o textarea oculto
+            quill.on('text-change', function() {
+                document.getElementById('conteudo').value = quill.root.innerHTML;
+            });
+
+            // Garantir que o conteúdo seja sincronizado antes do envio
+            document.getElementById('formNota').addEventListener('submit', function() {
+                document.getElementById('conteudo').value = quill.root.innerHTML;
+            });
+
+            // ===== CONFIGURAÇÃO DO DROPZONE =====
             Dropzone.autoDiscover = false;
 
             let anexosCarregados = [];
 
-            // Dropzone simples
             const dropzone = new Dropzone("#dropzone-anexos", {
                 url: "{{ route('anexos.upload') }}",
                 headers: {
@@ -129,7 +174,7 @@
                 acceptedFiles: ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt",
 
                 success: function(file, response) {
-                    console.log('Response completo:', response); // DEBUG
+                    console.log('Response completo:', response);
 
                     if (response.success) {
                         const anexo = {
@@ -139,9 +184,6 @@
                             tamanho: response.tamanho
                         };
 
-                        console.log('Anexo criado:', anexo); // DEBUG
-                        console.log('URL da imagem:', anexo.url); // DEBUG
-
                         anexosCarregados.push(anexo);
                         mostrarAnexos();
                         this.removeFile(file);
@@ -149,7 +191,7 @@
                 },
 
                 error: function(file, message) {
-                    console.error('Erro upload:', message); // DEBUG
+                    console.error('Erro upload:', message);
                     alert('Erro: ' + message);
                     this.removeFile(file);
                 }
@@ -157,8 +199,6 @@
 
             // Mostrar lista de anexos
             function mostrarAnexos() {
-                console.log('Mostrando anexos:', anexosCarregados); // DEBUG
-
                 const container = document.getElementById('anexos-preview');
                 const lista = document.getElementById('lista-anexos');
                 const inputs = document.getElementById('anexos-inputs');
@@ -169,9 +209,6 @@
                     inputs.innerHTML = '';
 
                     anexosCarregados.forEach((anexo, index) => {
-                        console.log(`Processando anexo ${index}:`, anexo); // DEBUG
-
-                        // Item visual
                         const div = document.createElement('div');
                         div.className = 'border rounded p-2 mb-2';
 
@@ -180,19 +217,18 @@
 
                         if (ehImagem && anexo.url) {
                             previewHtml =
-                                `<img src="${anexo.url}" style="max-width: 80px; max-height: 80px; margin-bottom: 5px;" class="d-block" onerror="console.log('Erro ao carregar imagem: ${anexo.url}')">`;
+                                `<img src="${anexo.url}" style="max-width: 80px; max-height: 80px; margin-bottom: 5px;" class="d-block">`;
                         }
 
                         div.innerHTML = `
-                    ${previewHtml}
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>${anexo.nome}</span>
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removerAnexo(${index})">X</button>
-                    </div>
-                `;
+                            ${previewHtml}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>${anexo.nome}</span>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removerAnexo(${index})">X</button>
+                            </div>
+                        `;
                         lista.appendChild(div);
 
-                        // Input hidden
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = 'anexos_temp[]';
@@ -204,24 +240,14 @@
                 }
             }
 
-            // Verificar se é imagem
             function isImagem(nome) {
-                const resultado = /\.(jpg|jpeg|png|gif)$/i.test(nome);
-                console.log(`Verificando se ${nome} é imagem: ${resultado}`); // DEBUG
-                return resultado;
+                return /\.(jpg|jpeg|png|gif)$/i.test(nome);
             }
 
-            // Remover anexo
             window.removerAnexo = function(index) {
-                console.log('=== DEBUG REMOÇÃO ===');
-                console.log('Index:', index);
-                console.log('Anexos array:', anexosCarregados);
-
                 const anexo = anexosCarregados[index];
-                console.log('Anexo selecionado:', anexo);
 
                 if (!anexo || !anexo.id) {
-                    console.error('Anexo inválido!');
                     alert('Erro: anexo não encontrado');
                     return;
                 }
@@ -234,12 +260,8 @@
                                     .getAttribute('content')
                             }
                         })
-                        .then(response => {
-                            console.log('Status da resposta:', response.status);
-                            return response.json();
-                        })
+                        .then(response => response.json())
                         .then(data => {
-                            console.log('Resposta completa:', data);
                             if (data.success) {
                                 anexosCarregados.splice(index, 1);
                                 mostrarAnexos();

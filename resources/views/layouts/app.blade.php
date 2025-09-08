@@ -31,15 +31,20 @@
     <!-- Graficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.css" rel="stylesheet" />
 
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+        rel="stylesheet">
+
+    @stack('styles')
 
 </head>
 
-<body class="custom-body">
-    <div class="layout-container">
+<body class="custom-body d-flex flex-column min-vh-100">
         @include('layouts.navigation')
 
-        <main class="container mt-5 pt-4">
+        <main class="container mt-5 pt-4 flex-grow-1">
             <!-- ALERTAS GLOBAIS - funcionam em qualquer página -->
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -57,16 +62,23 @@
 
             @yield('slot')
         </main>
-    </div>
+        <footer class="">
+            <div class="footer py-3 mt-auto">
+                <p class="text-center">© 2025 Bloco de Notas - Todos os direitos reservados.</p>
+            </div>
+        </footer>
+
 
     <!-- Bootstrap JS (via CDN) + dependências -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous">
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
 
     @stack('scripts')
 </body>
 
 </html>
-ipvc modularizar
+{{-- ipvc modularizar --}}
