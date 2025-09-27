@@ -21,6 +21,9 @@ class NotaController extends Controller
 
     public function index(Request $request)
     {
+        $highlightId = $request->get('highlight');
+
+
         $notasExcluidasCount = Nota::onlyTrashed()
             ->where('user_id', auth()->id())
             ->count();
@@ -96,7 +99,7 @@ class NotaController extends Controller
             ->with('prioridade')
             ->get();
 
-        return view('notas.index', compact('notas', 'categorias', 'tags', 'prioridades', 'notasPorPrioridade', 'notasExcluidasCount'));
+        return view('notas.index', compact('notas', 'highlightId','categorias', 'tags', 'prioridades', 'notasPorPrioridade', 'notasExcluidasCount'));
     }
 
     /*======== Método create ========*/

@@ -12,7 +12,11 @@
 .collapse {
     transition: all 0.3s ease;
 }
-
+.highlight-nota {
+    background-color: #fff3cd;
+    border: 2px solid #ffc107;
+    animation: pulse 2s;
+}
 /*======== navigation.blade ========*/
 
 .input-group-text {
@@ -29,6 +33,9 @@
     background-color: aliceblue;
     border-top: 1px solid #dbdbdb;
     font-family: 'Figtree', sans-serif;
+}
+footer p {
+    margin: 0px;
 }
 
 /* Logo */
@@ -371,3 +378,21 @@
 
 
 /*======== notas.index.blade ========*/
+
+.highlight-nota {
+    background-color: #fff3cd !important;
+    border: 2px solid #ffc107 !important;
+    transition: all 2s ease-out;
+    animation: pulse 2s;
+}
+
+.highlight-nota.fade-out {
+    background-color: transparent !important;
+    border-color: transparent !important;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}

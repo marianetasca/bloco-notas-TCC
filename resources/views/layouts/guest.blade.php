@@ -7,6 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Bloco de notas') }}</title>
+    <link rel="shortcut icon" href="{{ asset('img/borboleta.png') }}" type="image/png">
+
+    <title></title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

@@ -11,7 +11,8 @@
 
 
             <!-- Botão hamburguer -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarConteudo" aria-controls="navbarConteudo" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarConteudo"
+                aria-controls="navbarConteudo" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -20,18 +21,28 @@
                 <!-- Links de navegação -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 d-flex gap-3">
                     <li class="nav-item">
-                        <a href="{{ route('notas.index') }}" class="nav-link {{ request()->routeIs('notas.*') ? 'active' : '' }}">Minhas Notas</a>
+                        <a href="{{ route('notas.index') }}"
+                            class="nav-link {{ request()->routeIs('notas.*') ? 'active' : '' }}">Minhas Notas</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('categorias.index') }}" class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}">Categorias</a>
+                        <a href="{{ route('categorias.index') }}"
+                            class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}">Categorias</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('tags.index') }}" class="nav-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">Tags</a>
+                        <a href="{{ route('tags.index') }}"
+                            class="nav-link {{ request()->routeIs('tags.*') ? 'active' : '' }}">Tags</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Estatísticas</a>
+                        <a href="{{ route('dashboard') }}"
+                            class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Estatísticas</a>
                     </li>
                 </ul>
+
+                <div>
+                    <a href="{{ route('notification-preferences.edit') }}" class="dropdown-item">
+                        <i class="bi bi-bell text-warning-ed pe-4"></i>
+                    </a>
+                </div>
 
                 <!-- Área do usuário -->
 

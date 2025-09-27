@@ -18,6 +18,16 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('notas:limpar-lixeira')->daily();
 
+
+        // Verifica notas vencendo todo dia às 9h da manhã
+        $schedule->command('notas:check-expiring')
+            ->dailyAt('09:00')
+            ->withoutOverlapping(); // Evita execuções simultâneas
+
+        // também às 18h para lembrete do final do dia
+        $schedule->command('notas:check-expiring')
+            ->dailyAt('18:00')
+            ->withoutOverlapping();
     }
 
     /**
@@ -25,7 +35,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
         require base_path('routes/console.php');
     }
 }

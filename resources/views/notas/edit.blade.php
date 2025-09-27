@@ -203,7 +203,6 @@
             let novosAnexos = [];
             let anexosRemovidos = [];
 
-            // Dropzone simples
             const dropzone = new Dropzone("#dropzone-anexos", {
                 url: "{{ route('anexos.upload') }}",
                 headers: {

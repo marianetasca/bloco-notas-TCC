@@ -8,6 +8,7 @@
 
     <title>{{ config('app.name', 'Bloco de notas') }}</title>
 
+    <link rel="shortcut icon" href="{{ asset('img/borboleta.png') }}" type="image/png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -62,7 +63,7 @@
 
             @yield('slot')
         </main>
-        <footer class="">
+        <footer class="mt-3">
             <div class="footer py-3 mt-auto">
                 <p class="text-center">© 2025 Bloco de Notas - Todos os direitos reservados.</p>
             </div>

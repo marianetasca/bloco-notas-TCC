@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\NotificationPreferencesController;
 use Illuminate\Support\Facades\Route;
 
 // Rota inicial
@@ -51,6 +53,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/anexos/limpar-temporarios', [AnexoController::class, 'limparTemporarios'])->name('anexos.limpar-temporarios');
     // Exclusão de anexo específico de uma nota
     Route::delete('/notas/{nota}/anexos/{anexo}', [AnexoController::class, 'destroy'])->name('anexos.destroy');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+
+    // Preferências de notificação
+    Route::get('/notifications', [NotificationPreferencesController::class, 'edit'])->name('notification-preferences.edit');
+    Route::put('/notifications', [NotificationPreferencesController::class, 'update'])->name('notification-preferences.update');
 
     // Resource notas
     Route::resource('notas', NotaController::class);
