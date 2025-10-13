@@ -10,56 +10,44 @@ use Carbon\Carbon;
 
 class CheckExpiringNotes extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'notes:check-expiring';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Verifica notas próximas do vencimento e envia notificações';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $today = Carbon::today();
         $notificationsSent = 0;
 
-        // Buscar todos os usuários que têm notificações ativas
-        $usersWithNotifications = User::where('notificacoes_ativas', true)
-            ->with(['notas' => function($query) {
-                $query->whereNull('concluida_em')
-                      ->whereNotNull('data_vencimento');
-            }])
-            ->get();
+        // Buscar usuários com notificações ativas
+        $usersWithNotifications = User::where('notificacoes_ativas', true)->get();
 
         foreach ($usersWithNotifications as $user) {
             $preferencias = $user->preferencias_notificacao;
             $diasAntecedencia = $preferencias['dias_antecedencia'] ?? [7, 1, 0];
 
             foreach ($diasAntecedencia as $dias) {
+                // Garantir que $dias seja um inteiro
+                $dias = (int) $dias;
                 $dataAlvo = $today->copy()->addDays($dias);
 
-                $notasVencendo = $user->notas()
+                // Buscar notas do usuário que vencem na data alvo
+                $notasVencendo = Nota::where('user_id', $user->id)
                     ->whereDate('data_vencimento', $dataAlvo)
-                    ->whereNull('concluida_em')
+                    ->where('concluido', false)
+                    ->whereNull('completed_at')
                     ->get();
 
                 foreach ($notasVencendo as $nota) {
-                    $user->notify(new NotaExpiringNotification($nota, $dias));
-                    $notificationsSent++;
+                    if ($user->recebeNotificacoesPorEmail()) {
+                        $user->notify(new NotaExpiringNotification($nota, $dias));
+                        $notificationsSent++;
+                        $this->info("Notificação enviada para {$user->email} - Nota: {$nota->titulo} (vence em {$dias} dias)");
+                    }
                 }
             }
         }
 
-        $this->info("Notificações enviadas: {$notificationsSent}");
+        $this->info("Total de notificações enviadas: {$notificationsSent}");
 
         return Command::SUCCESS;
     }

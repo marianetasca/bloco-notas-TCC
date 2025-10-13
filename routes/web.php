@@ -10,19 +10,21 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationPreferencesController;
 use Illuminate\Support\Facades\Route;
 
+/* ROTAS ESPECÍFICAS PRIMEIRO
+// ROTAS GENÉRICAS DEPOIS*/
+
 // Rota inicial
 Route::get('/', fn() => redirect()->route('login'));
 
 // Autenticação Breeze
 require __DIR__ . '/auth.php';
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () { //auth porque o usuario precisa estar logado para acessar qualquer rota a baixo
     Route::get('/only-verified', function () {
         return view('only-verified');
     })->middleware(['auth', 'verified']);
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -51,22 +53,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/anexos/upload', [AnexoController::class, 'upload'])->name('anexos.upload');
     Route::delete('/anexos/{anexo}', [AnexoController::class, 'remove'])->name('anexos.remove');    // Limpeza de anexos temporários
     Route::delete('/anexos/limpar-temporarios', [AnexoController::class, 'limparTemporarios'])->name('anexos.limpar-temporarios');
+
     // Exclusão de anexo específico de uma nota
     Route::delete('/notas/{nota}/anexos/{anexo}', [AnexoController::class, 'destroy'])->name('anexos.destroy');
 
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+   // Rotas especificas (notificações)
     Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::delete('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.delete-all');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    // Rotas genericas (notificações)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     // Preferências de notificação
-    Route::get('/notifications', [NotificationPreferencesController::class, 'edit'])->name('notification-preferences.edit');
-    Route::put('/notifications', [NotificationPreferencesController::class, 'update'])->name('notification-preferences.update');
+    Route::get('/notification-preferences', [NotificationPreferencesController::class, 'edit'])->name('notification-preferences.edit');
+    Route::put('/notification-preferences', [NotificationPreferencesController::class, 'update'])->name('notification-preferences.update');
 
-    // Resource notas
+    // Resources
     Route::resource('notas', NotaController::class);
-
-    // Outros resources
     Route::resource('tags', TagController::class);
     Route::resource('categorias', CategoriaController::class);
 });

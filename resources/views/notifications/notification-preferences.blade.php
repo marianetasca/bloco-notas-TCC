@@ -1,4 +1,3 @@
-{{-- Ajuste o @extends conforme seu layout --}}
 @extends('layouts.app')
 
 @section('slot')
@@ -99,17 +98,14 @@
 
                                 {{-- Horário de envio --}}
                                 <div class="mb-4">
-                                    <label for="horario_envio" class="form-label">Horário preferido para envio</label>
-                                    <input type="time" class="form-control" id="horario_envio" name="horario_envio"
-                                        value="{{ $preferencias['horario_envio'] ?? '09:00' }}" required>
                                     <div class="form-text">
-                                        As notificações serão enviadas neste horário
+                                        As notificações serão enviadas as 9 horas da manhã.
                                     </div>
                                 </div>
                             </div>
 
                             <div class="d-flex justify-content-end">
-                                <a href="{{ route('notas.index') }}" class="btn btn-secondary me-2">Voltar</a>
+                                <a href="{{ route('notifications.index') }}" class="btn btn-secondary me-2">Voltar</a>
                                 <button type="submit" class="btn btn-primary-ed">
                                     <i class="bi bi-check-lg"></i> Salvar Preferências
                                 </button>

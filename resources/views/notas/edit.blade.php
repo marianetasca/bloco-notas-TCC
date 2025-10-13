@@ -287,7 +287,6 @@
                 return icons[extension] || 'fas fa-file text-secondary';
             }
 
-            // Remover novo anexo
             // Remover novo anexo (temporário)
             window.removerNovo = function(index) {
                 if (confirm('Remover arquivo?')) {
@@ -299,7 +298,6 @@
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
                                     .getAttribute('content')
-                                // ❌ Removido Content-Type e body - DELETE não precisa
                             }
                         })
                         .then(response => response.json())

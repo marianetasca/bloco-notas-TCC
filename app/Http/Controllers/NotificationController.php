@@ -58,4 +58,31 @@ class NotificationController extends Controller
 
         return back()->with('success', 'Todas as notificações foram marcadas como lidas.');
     }
+
+    /**
+     * Apagar uma notificação específica
+     */
+    public function destroy(Request $request, string $id)
+    {
+        $notification = $request->user()
+            ->notifications()
+            ->findOrFail($id);
+
+        $notification->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notificação removida com sucesso'
+        ]);
+    }
+
+    /**
+     * Apagar todas as notificações
+     */
+    public function deleteAll(Request $request)
+    {
+        $request->user()->notifications()->delete();
+
+        return back()->with('success', 'Todas as notificações foram removidas.');
+    }
 }

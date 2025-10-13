@@ -24,10 +24,6 @@ class Kernel extends ConsoleKernel
             ->dailyAt('09:00')
             ->withoutOverlapping(); // Evita execuções simultâneas
 
-        // também às 18h para lembrete do final do dia
-        $schedule->command('notas:check-expiring')
-            ->dailyAt('18:00')
-            ->withoutOverlapping();
     }
 
     /**

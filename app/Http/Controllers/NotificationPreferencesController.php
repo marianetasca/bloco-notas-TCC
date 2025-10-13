@@ -15,7 +15,7 @@ class NotificationPreferencesController extends Controller
     {
         $user = $request->user();
 
-        return view('notification-preferences', [
+        return view('notifications.notification-preferences', [
             'user' => $user,
             'preferencias' => $user->preferencias_notificacao
         ]);
@@ -26,29 +26,26 @@ class NotificationPreferencesController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+
         $validated = $request->validate([
-            'notificacoes_ativas' => 'boolean',
-            'email' => 'boolean',
-            'whatsapp' => 'boolean',
-            'telefone' => 'nullable|string|max:20',
-            'dias_antecedencia' => 'array',
-            'dias_antecedencia.*' => 'integer|min:0|max:30',
-            'horario_envio' => 'required|date_format:H:i',
-        ]);
+        'telefone' => 'nullable|string|max:20',
+        'dias_antecedencia' => 'nullable|array',
+        'dias_antecedencia.*' => 'integer|min:0|max:30',
+    ]);
 
-        $user = $request->user();
+    $user = $request->user();
 
-        // Atualizar campos básicos
-        $user->notificacoes_ativas = $request->boolean('notificacoes_ativas');
-        $user->telefone = $validated['telefone'] ?? null;
+    // Atualizar campos básicos
+    $user->notificacoes_ativas = $request->boolean('notificacoes_ativas');
+    $user->telefone = $validated['telefone'] ?? null;
 
-        // Atualizar preferências JSON
-        $preferencias = [
-            'email' => $request->boolean('email'),
-            'whatsapp' => $request->boolean('whatsapp'),
-            'dias_antecedencia' => $validated['dias_antecedencia'] ?? [7, 1, 0],
-            'horario_envio' => $validated['horario_envio'],
-        ];
+    // Atualizar preferências JSON
+    $preferencias = [
+        'email' => $request->boolean('email'),
+        'whatsapp' => $request->boolean('whatsapp'),
+        'dias_antecedencia' => $validated['dias_antecedencia'] ?? [7, 1, 0], // ← Padrão se vazio
+        'horario_envio' => '09:00', // ← Fixo
+    ];
 
         $user->preferencias_notificacao = $preferencias;
         $user->save();

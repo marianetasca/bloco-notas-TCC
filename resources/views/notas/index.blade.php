@@ -111,7 +111,8 @@
         {{-- Lista de Notas --}}
         @forelse($notas as $nota)
             <div class="mb-4">
-                <div class="card h-100 shadow-sm w-100  {{ isset($highlightId) && $highlightId == $nota->id ? 'highlight-nota' : '' }}">
+                <div
+                    class="card h-100 shadow-sm w-100  {{ isset($highlightId) && $highlightId == $nota->id ? 'highlight-nota' : '' }}">
                     <div class="card-body d-flex flex-column position-relative">
                         <h5 class="card-title pb-1 pe-5 text-truncate" id="tituloResumido{{ $nota->id }}"
                             title="{{ $nota->titulo }}" style="max-width: calc(100% - 100px);">
@@ -434,9 +435,8 @@
         }
 
 
-        // Função simples para abrir imagem em modal
+        // Função em modal
         function abrirImagem(url, nome) {
-            // Criar modal simples
             const modal = document.createElement('div');
             modal.innerHTML = `
                 <div class="modal fade" tabindex="-1">

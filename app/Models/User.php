@@ -50,7 +50,16 @@ class User extends Authenticatable //implements MustVerifyEmail
             'preferencias_notificacao' => 'array', // JSON para array
         ];
     }
-     /**
+
+    /**
+     * Relacionamento com Notas
+     */
+    public function notas()
+    {
+        return $this->hasMany(Nota::class);
+    }
+
+    /**
      * Verifica se o usuário quer receber notificações
      */
     public function recebeNotificacoes(): bool
@@ -91,12 +100,20 @@ class User extends Authenticatable //implements MustVerifyEmail
     {
         $decoded = json_decode($value, true) ?? [];
 
-        return array_merge([
+        $defaults = [
             'email' => true,
             'whatsapp' => false,
             'dias_antecedencia' => [7, 1, 0], // 7 dias, 1 dia, no dia
             'horario_envio' => '09:00',
-        ], $decoded);
+        ];
+
+        $merged = array_merge($defaults, $decoded);
+
+        // Garantir que dias_antecedencia seja array de inteiros
+        if (isset($merged['dias_antecedencia']) && is_array($merged['dias_antecedencia'])) {
+            $merged['dias_antecedencia'] = array_map('intval', $merged['dias_antecedencia']);
+        }
+
+        return $merged;
     }
 }
-

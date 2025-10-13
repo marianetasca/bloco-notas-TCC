@@ -38,14 +38,20 @@
                     </li>
                 </ul>
 
+                {{-- Ícone de notificações --}}
                 <div>
-                    <a href="{{ route('notification-preferences.edit') }}" class="dropdown-item">
+                    <a href="{{ route('notifications.index') }}">
                         <i class="bi bi-bell text-warning-ed pe-4"></i>
+                        @if (auth()->user()->unreadNotifications->count() > 0)
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
                     </a>
                 </div>
 
                 <!-- Área do usuário -->
-
                 <div class="user-info d-flex align-items-center gap-2">
                     <span class="user-name">{{ Auth::user()->name }}</span>
                     <a href="{{ route('profile.edit') }}" class="btn btn-primary user-link">Perfil</a>

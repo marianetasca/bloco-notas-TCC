@@ -32,7 +32,7 @@
 
         <!-- Nova senha -->
         <div class="mb-3">
-            <label for="password" class="form-label">{{ __('Password') }}</label>
+            <label for="password" class="form-label">{{ __('New Password') }}</label>
 
             <div class="position-relative">
                 <input id="password" type="password" name="password" required autocomplete="new-password"
@@ -47,7 +47,7 @@
 
         <!-- Confirmar senha -->
         <div class="mb-3">
-            <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
+            <label for="password_confirmation" class="form-label">{{ __('Confirme a nova senha') }}</label>
             <div class="position-relative">
 
                 <input id="password_confirmation" type="password" name="password_confirmation" required

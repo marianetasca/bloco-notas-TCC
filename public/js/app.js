@@ -84,6 +84,11 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
 
+    if (!passwordInput) {
+        // Não há campo de senha nesta página -> não anexa listeners
+        return;
+    }
+
     passwordInput.addEventListener('input', () => {
         const value = passwordInput.value;
 
@@ -98,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rules.forEach(rule => {
             const li = document.getElementById(rule.el);
+            if (!li) return; // some pages may not include the criteria list
             if (rule.regex.test(value)) {
                 li.classList.remove('text-danger');
                 li.classList.add('text-success');
@@ -111,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-//Notificação
+//Notificação acessada pelo email
 document.addEventListener('DOMContentLoaded', function() {
     const highlightedNote = document.querySelector('.highlight-nota');
 

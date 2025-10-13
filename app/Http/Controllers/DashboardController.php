@@ -7,6 +7,7 @@ use App\Models\Nota;
 use App\Models\Prioridade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -14,7 +15,7 @@ class DashboardController extends Controller
     {
         Carbon::setLocale('pt_BR');
 
-        $userId = auth()->id();
+        $userId = Auth::id();
         $query = Nota::where('user_id', $userId);
 
         // Filtros por data, mês e ano
@@ -53,8 +54,8 @@ class DashboardController extends Controller
         ];
 
         // Agrupamento por categoria
-        $notasPorCategoria = Categoria::withCount(['notas as count' => function ($q) use ($userId, $request) {
-            $q->where('user_id', $userId);
+        $notasPorCategoria = Categoria::where('user_id', $userId)->withCount(['notas as count' => function ($q) use ($userId, $request) {
+            $q->where('user_id', $userId)->whereNull('deleted_at');//para nao contar com as notas da lixeira
             if ($request->filled('data')) {
                 $q->whereDate('created_at', $request->input('data'));
             }
@@ -68,7 +69,7 @@ class DashboardController extends Controller
 
         // Agrupamento por prioridade
         $notasPorPrioridade = Prioridade::with(['notas' => function ($q) use ($userId, $request) {
-            $q->where('user_id', $userId);
+            $q->where('user_id', $userId)->whereNull('deleted_at');;
             if ($request->filled('data')) {
                 $q->whereDate('created_at', $request->input('data'));
             }

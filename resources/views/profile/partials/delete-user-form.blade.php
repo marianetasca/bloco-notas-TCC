@@ -1,8 +1,6 @@
 <section class="container">
     <div class="">
-        <h2 class="h5 text-dark">
-            {{ __('Delete Account') }}
-        </h2>
+       
 
         <p class="text-muted small">
             {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}

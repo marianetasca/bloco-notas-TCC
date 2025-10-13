@@ -13,6 +13,8 @@ class AnexoController extends Controller
     /**
      * Upload de anexo via Dropzone
      */
+    /** @var int $userId */
+
     public function upload(Request $request)
     {
         $request->validate([
