@@ -43,9 +43,6 @@ Route::middleware(['auth'])->group(function () { //auth porque o usuario precisa
         ->withTrashed()
         ->name('notas.excluir-permanente');
 
-    Route::post('/notas/{nota}/complete', [NotaController::class, 'complete'])
-        ->name('notas.complete');
-
     Route::post('/notas/{nota}/concluido', [NotaController::class, 'concluido'])
         ->name('notas.concluido');
 

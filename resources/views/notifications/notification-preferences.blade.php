@@ -44,7 +44,8 @@
 
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="whatsapp" name="whatsapp"
-                                            value="1" {{ $preferencias['whatsapp'] ?? false ? 'checked' : '' }}>
+                                            disabled value="1"
+                                            {{ $preferencias['whatsapp'] ?? false ? 'checked' : '' }}>
                                         <label class="form-check-label" for="whatsapp">
                                             <i class="bi bi-whatsapp text-success"></i> Por WhatsApp
                                             <span class="badge bg-secondary ms-2">Em breve</span>
@@ -67,32 +68,35 @@
                                     <h6>Com quantos dias de antecedência?</h6>
                                     <div class="form-text mb-2">Você receberá notificações nestes períodos:</div>
 
+                                    {{-- Campo hidden para enviar array mesmo vazio --}}
+                                    <input type="hidden" name="dias_antecedencia[]" value="">
+
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="dias_antecedencia[]"
-                                            value="7"
-                                            {{ in_array(7, $preferencias['dias_antecedencia'] ?? [7, 1, 0]) ? 'checked' : '' }}>
-                                        <label class="form-check-label">7 dias antes</label>
+                                            value="7" id="dias_7"
+                                            {{ in_array(7, old('dias_antecedencia', $preferencias['dias_antecedencia'] ?? [7, 1, 0])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="dias_7">7 dias antes</label>
                                     </div>
 
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="dias_antecedencia[]"
-                                            value="3"
-                                            {{ in_array(3, $preferencias['dias_antecedencia'] ?? []) ? 'checked' : '' }}>
-                                        <label class="form-check-label">3 dias antes</label>
+                                            value="3" id="dias_3"
+                                            {{ in_array(3, old('dias_antecedencia', $preferencias['dias_antecedencia'] ?? [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="dias_3">3 dias antes</label>
                                     </div>
 
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="dias_antecedencia[]"
-                                            value="1"
-                                            {{ in_array(1, $preferencias['dias_antecedencia'] ?? [7, 1, 0]) ? 'checked' : '' }}>
-                                        <label class="form-check-label">1 dia antes</label>
+                                            value="1" id="dias_1"
+                                            {{ in_array(1, old('dias_antecedencia', $preferencias['dias_antecedencia'] ?? [7, 1, 0])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="dias_1">1 dia antes</label>
                                     </div>
 
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="dias_antecedencia[]"
-                                            value="0"
-                                            {{ in_array(0, $preferencias['dias_antecedencia'] ?? [7, 1, 0]) ? 'checked' : '' }}>
-                                        <label class="form-check-label">No dia do vencimento</label>
+                                            value="0" id="dias_0"
+                                            {{ in_array(0, old('dias_antecedencia', $preferencias['dias_antecedencia'] ?? [7, 1, 0])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="dias_0">No dia do vencimento</label>
                                     </div>
                                 </div>
 

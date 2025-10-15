@@ -39,12 +39,12 @@
                 </ul>
 
                 {{-- Ícone de notificações --}}
-                <div>
+                <div class="position-relative d-inline-block pe-4">
                     <a href="{{ route('notifications.index') }}">
-                        <i class="bi bi-bell text-warning-ed pe-4"></i>
+                        <i class="bi bi-bell text-warning-ed fs-5"></i>
                         @if (auth()->user()->unreadNotifications->count() > 0)
                             <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                class="position-absolute top-0 start-98 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
                                 {{ auth()->user()->unreadNotifications->count() }}
                             </span>
                         @endif
