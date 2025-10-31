@@ -4,11 +4,10 @@
     <div class="container py-5">
 
         {{-- Filtros (data, mês, ano) --}}
-
         <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-end gap-2 mb-4">
             <div class="row g-3">
                 {{-- Data --}}
-                <div class="col-md-3 col-6 w-auto">
+                <div class="col-md-3 col-6 min-w-4 w-auto">
                     <input type="date" name="data" class="form-control" value="{{ request('data') }}">
                 </div>
 

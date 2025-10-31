@@ -2,23 +2,22 @@
 /* corpo principal */
 .custom-body {
     color: rgb(52, 52, 52);
-    background: linear-gradient(rgb(237, 246, 246), aliceblue);
+    background: linear-gradient(rgba(232, 243, 255, 0.407), #004c831c);
     min-height: 100vh;
     /*para ocupar a tela toda*/
 }
-
-/*======== profile.blade ========*/
-
-.collapse {
-    transition: all 0.3s ease;
+/*======== configurações especificas/ criação de classes novas ========*/
+.card-header {
+    border-radius: 1rem 1rem 0 0 !important;
 }
-.highlight-nota {
-    background-color: #fff3cd;
-    border: 2px solid #ffc107;
-    animation: pulse 2s;
+.bg-ed {
+    background-color: #F8FAFC;
+    border-radius: 0 0 1rem 1rem;
 }
+
+/*======== fim profile.blade ========*/
+
 /*======== navigation.blade ========*/
-
 .input-group-text {
     background-color: none;
 }
@@ -30,7 +29,7 @@
 }
 
 .footer {
-    background-color: aliceblue;
+    background-color: #004c831c;
     border-top: 1px solid #dbdbdb;
     font-family: 'Figtree', sans-serif;
 }
@@ -61,7 +60,6 @@ footer p {
 }
 
 /* Links de navegação */
-
 .navbar-nav li a {
     text-decoration: none;
     color: #333;
@@ -197,10 +195,9 @@ footer p {
     color: white;
 }
 
-/*======== navigation.blade ========*/
+/*======== fim navigation.blade ========*/
 
 /*======== notas.create.blade ========*/
-
 /*Botão de criar nota*/
 .btn-primary-ed {
     background-color: #004c83;
@@ -224,7 +221,7 @@ footer p {
     color: white;
 }
 
-/*======== notas.create.blade ========*/
+/*======== fim notas.create.blade ========*/
 
 /*======== notas.index.blade ========*/
 .textColor {
@@ -337,7 +334,7 @@ footer p {
     transform: translateY(-1px);
 }
 
-
+/* ajustes Quill */
 /* Remove numeração padrão do <ol> pai */
 .conteudo-nota ol {
     list-style: none;
@@ -373,12 +370,9 @@ footer p {
     left: 0;
     font-weight: bold;
 }
+/*======== fim notas.index.blade ========*/
 
-
-
-
-/*======== notas.index.blade ========*/
-
+/*======== notificacoes acessadas pelo email ========*/
 .highlight-nota {
     background-color: #fff3cd !important;
     border: 2px solid #ffc107 !important;
@@ -396,3 +390,4 @@ footer p {
     70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
 }
+/*======== fim notificacoes acessadas pelo email ========*/

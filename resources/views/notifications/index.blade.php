@@ -2,7 +2,7 @@
 
 @section('slot')
 
-    <div class="container py-">
+    <div class="container">
         <div class="text-end mb-3 mt-3">
             <a href="{{ route('notification-preferences.edit') }}" class="btn btn-primary-ed">
                 <i class="bi bi-gear"></i> Preferências das Notificações

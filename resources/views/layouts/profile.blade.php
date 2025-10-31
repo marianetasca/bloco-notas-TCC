@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Bloco de Notas') }}</title>
+    <title>{{ config('app.name', 'Mindly Notes') }}</title>
     <link rel="shortcut icon" href="{{ asset('img/borboleta.png') }}" type="image/png">
 
     <!-- O config('app.name') pega o nome definido no arquivo config/app.php. -->
@@ -26,16 +26,6 @@
 <body class="custom-body">
     <div class="layout-container">
         @include('layouts.navigation')
-
-        <!-- Page Heading -->
-        @if (isset($header))
-            <!--para evitar erro-->
-            <header class="page-header">
-                <div class="header-inner">
-                    {{ $header }}
-                </div>
-            </header>
-        @endif
 
         <!-- Page Content -->
         <main>

@@ -5,10 +5,9 @@
             <div class="navbarBrand">
                 <a href="{{ route('notas.index') }}" class="navbar-brand d-flex align-items-center py-2">
                     <img src="{{ asset('img/borboleta.png') }}" alt="Logo" class="logo-icon img-fluid w-5 me-3">
-                    <span class="logo-text me-5">Bloco de Notas</span>
+                    <span class="logo-text me-5">Mindly Notes</span>
                 </a>
             </div>
-
 
             <!-- Botão hamburguer -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarConteudo"
@@ -38,27 +37,31 @@
                     </li>
                 </ul>
 
-                {{-- Ícone de notificações --}}
-                <div class="position-relative d-inline-block pe-4">
-                    <a href="{{ route('notifications.index') }}">
-                        <i class="bi bi-bell text-warning-ed fs-5"></i>
-                        @if (auth()->user()->unreadNotifications->count() > 0)
-                            <span
-                                class="position-absolute top-0 start-98 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
-                                {{ auth()->user()->unreadNotifications->count() }}
-                            </span>
-                        @endif
-                    </a>
-                </div>
+                {{-- Para ficar um do lado do outro em telas menores --}}
+                <div class="d-flex align-items-center justify-content-start gap-2 flex-nowrap pb-3 p-lg-1" style="min-width: 0;">
+                    {{-- Ícone de notificações --}}
+                    <div class="position-relative d-inline-block pe-4">
+                        <a href="{{ route('notifications.index') }}">
+                            <i class="bi bi-bell text-warning-ed fs-5"></i>
+                            @if (auth()->user()->unreadNotifications->count() > 0)
+                                <span
+                                    class="position-absolute top-0 start-98 translate-middle badge rounded-pill bg-danger"
+                                    style="font-size: 0.65rem;">
+                                    {{ auth()->user()->unreadNotifications->count() }}
+                                </span>
+                            @endif
+                        </a>
+                    </div>
 
-                <!-- Área do usuário -->
-                <div class="user-info d-flex align-items-center gap-2">
-                    <span class="user-name">{{ Auth::user()->name }}</span>
-                    <a href="{{ route('profile.edit') }}" class="btn btn-primary user-link">Perfil</a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn user-link logout">Sair</button>
-                    </form>
+                    <!-- Área do usuário -->
+                    <div class="user-info d-flex align-items-center gap-2">
+                        <span class="user-name">{{ Auth::user()->name }}</span>
+                        <a href="{{ route('profile.edit') }}" class="btn btn-primary user-link">Perfil</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn user-link logout">Sair</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

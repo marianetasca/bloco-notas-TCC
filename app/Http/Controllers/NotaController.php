@@ -48,6 +48,18 @@ class NotaController extends Controller
             });
         }
 
+        // Filtro por vencidas ou ativas
+        if ($request->filtro == 'vencidas') {
+            $query->where('data_vencimento', '<', now())
+                ->whereNull('completed_at');
+        } elseif ($request->filtro == 'ativas') {
+            $query->where(function ($q) {
+                $q->where('data_vencimento', '>=', now())
+                    ->orWhereNull('data_vencimento')
+                    ->orWhereNotNull('completed_at');
+            });
+        }
+
         // Busca por título ou conteúdo
         if ($request->filled('busca')) {
             $busca = $request->busca;
@@ -99,7 +111,8 @@ class NotaController extends Controller
             ->with('prioridade')
             ->get();
 
-        return view('notas.index', compact('notas', 'highlightId','categorias', 'tags', 'prioridades', 'notasPorPrioridade', 'notasExcluidasCount'));
+
+        return view('notas.index', compact('notas', 'highlightId', 'categorias', 'tags', 'prioridades', 'notasPorPrioridade', 'notasExcluidasCount'));
     }
 
     /*======== Método create ========*/

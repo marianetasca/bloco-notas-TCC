@@ -1,164 +1,163 @@
 @extends('layouts.app')
 
 @section('slot')
-    <div class="container mt-4">
-        <h2 class="mb-4 textColor">Editar Nota</h2>
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+    <div class="container py-4">
+        <div class="card shadow rounded-4">
+            <div class="card-header">
+                <h2 class="mb-0 textColor">Editar Nota</h2>
             </div>
-        @endif
+            <div class="card-body bg-ed">
 
-        <form method="POST" action="{{ route('notas.update', $nota->id) }}" enctype="multipart/form-data" id="formNota">
-            @csrf
-            @method('PUT')
+                <form method="POST" action="{{ route('notas.update', $nota->id) }}" enctype="multipart/form-data"
+                    id="formNota">
+                    @csrf
+                    @method('PUT')
 
-            {{-- titulo --}}
-            <div class="mb-3">
-                <label for="titulo" class="form-label">Título</label>
-                <input type="text" name="titulo" id="titulo" class="form-control"
-                    value="{{ old('titulo', $nota->titulo) }}" required>
-            </div>
-
-            {{-- conteudo --}}
-            <div class="mb-3">
-                <label for="conteudo" class="form-label">Conteúdo</label>
-                <div id="editor" style="min-height: 200px;" class="bg-white"></div>
-                <textarea name="conteudo" id="conteudo" style="display: none;" required>{{ old('conteudo', $nota->conteudo) }}</textarea>
-            </div>
-
-            <div class="row g-3"> {{-- para ocupar a mesma linha --}}
-                {{-- categoria --}}
-                <div class="col-md-4 w-auto">
-                    <label for="categoria_id" class="form-label">Categoria</label>
-                    <select name="categoria_id" id="categoria_id" class="form-select" required>
-                        @foreach ($categorias as $categoria)
-                            <option value="{{ $categoria->id }}"
-                                {{ old('categoria_id', $nota->categoria_id) == $categoria->id ? 'selected' : '' }}>
-                                {{ $categoria->nome }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- data --}}
-                <div class="col-md-4 w-auto">
-                    <label for="data_vencimento" class="form-label">Data de vencimento</label>
-                    <input type="date" name="data_vencimento" id="data_vencimento" class="form-control"
-                        value="{{ old('data_vencimento', \Carbon\Carbon::parse($nota->data_vencimento)->format('Y-m-d')) }}">
-                </div>
-
-                {{-- prioridades --}}
-                <div class="col-md-4 w-auto">
-                    <label for="prioridade" class="form-label">Prioridade</label>
-                    <select name="prioridade_id" id="prioridade_id" class="form-select" required>
-                        @foreach ($prioridades as $prioridade)
-                            <option value="{{ $prioridade->id }}"
-                                {{ old('prioridade_id', $nota->prioridade_id) == $prioridade->id ? 'selected' : '' }}>
-                                {{ $prioridade->nome }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            {{-- tags --}}
-            <div class="mt-3">
-                <label class="form-label">Tags</label><br>
-                @foreach ($tags as $tag)
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="tags[]" id="tag_{{ $tag->id }}"
-                            value="{{ $tag->id }}" {{ $nota->tags->contains($tag->id) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="tag_{{ $tag->id }}">{{ $tag->nome }}</label>
+                    {{-- titulo --}}
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input type="text" name="titulo" id="titulo" class="form-control"
+                            value="{{ old('titulo', $nota->titulo) }}" required>
                     </div>
-                @endforeach
-            </div>
-            {{-- Anexos Existentes --}}
-            @if ($nota->anexos->count() > 0)
-                <div class="mt-4">
-                    <label class="form-label">Anexos Atuais</label>
-                    <div id="anexos-existentes">
-                        @foreach ($nota->anexos as $anexo)
-                            <div class="border rounded p-3 mb-2" data-anexo-id="{{ $anexo->id }}">
-                                {{-- Preview simples para imagens --}}
-                                @if (in_array(strtolower(pathinfo($anexo->nome_original, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif']))
-                                    <img src="{{ $anexo->url }}"
-                                        style="max-width: 100px; max-height: 100px; margin-bottom: 10px;" class="d-block">
-                                @elseif(strtolower(pathinfo($anexo->nome_original, PATHINFO_EXTENSION)) === 'pdf')
-                                    {{-- PDF --}}
-                                    <a href="{{ $anexo->url }}" class="text-decoration-none">
-                                        <div class="anexo-pdf-preview d-flex align-items-center justify-content-center"
-                                            style="max-width: 100px; max-height: 100px; background: #f8f9fa; cursor: pointer;">
-                                            <div class="text-center">
-                                                <i class="fas fa-file-pdf fa-4x text-danger mb-2"></i>
-                                                <div class="small text-muted">PDF</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                @endif
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ $anexo->nome_original }}</strong>
-                                        <small class="text-muted d-block">{{ $anexo->tamanho_formatado }}</small>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="{{ $anexo->url }}" target="_blank"
-                                        class="btn btn-sm btn-outline-primary">Ver</a>
-                                    <button type="button" class="btn btn-sm btn-danger"
-                                        onclick="removerAnexoExistente({{ $anexo->id }})"><i
-                                            class="bi bi-trash"></i>Remover</button>
-                                </div>
+
+                    {{-- conteudo --}}
+                    <div class="mb-3">
+                        <label for="conteudo" class="form-label">Conteúdo</label>
+                        <div id="editor" style="min-height: 200px;" class="bg-white"></div>
+                        <textarea name="conteudo" id="conteudo" style="display: none;" required>{{ old('conteudo', $nota->conteudo) }}</textarea>
+                    </div>
+
+                    <div class="row g-3"> {{-- para ocupar a mesma linha --}}
+                        {{-- categoria --}}
+                        <div class="col-md-4 w-auto">
+                            <label for="categoria_id" class="form-label">Categoria</label>
+                            <select name="categoria_id" id="categoria_id" class="form-select" required>
+                                @foreach ($categorias as $categoria)
+                                    <option value="{{ $categoria->id }}"
+                                        {{ old('categoria_id', $nota->categoria_id) == $categoria->id ? 'selected' : '' }}>
+                                        {{ $categoria->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- data --}}
+                        <div class="col-md-4 w-auto">
+                            <label for="data_vencimento" class="form-label">Data de vencimento</label>
+                            <input type="date" name="data_vencimento" id="data_vencimento" class="form-control"
+                                value="{{ old('data_vencimento', \Carbon\Carbon::parse($nota->data_vencimento)->format('Y-m-d')) }}">
+                        </div>
+
+                        {{-- prioridades --}}
+                        <div class="col-md-4 w-auto">
+                            <label for="prioridade" class="form-label">Prioridade</label>
+                            <select name="prioridade_id" id="prioridade_id" class="form-select" required>
+                                @foreach ($prioridades as $prioridade)
+                                    <option value="{{ $prioridade->id }}"
+                                        {{ old('prioridade_id', $nota->prioridade_id) == $prioridade->id ? 'selected' : '' }}>
+                                        {{ $prioridade->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- tags --}}
+                    <div class="mt-3">
+                        <label class="form-label">Tags</label><br>
+                        @foreach ($tags as $tag)
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="tags[]" id="tag_{{ $tag->id }}"
+                                    value="{{ $tag->id }}" {{ $nota->tags->contains($tag->id) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="tag_{{ $tag->id }}">{{ $tag->nome }}</label>
                             </div>
                         @endforeach
                     </div>
-                </div>
-            @endif
+                    {{-- Anexos Existentes --}}
+                    @if ($nota->anexos->count() > 0)
+                        <div class="mt-4">
+                            <label class="form-label">Anexos Atuais</label>
+                            <i class="fas fa-paperclip me-2"></i>
+                            <div id="anexos-existentes">
+                                @foreach ($nota->anexos as $anexo)
+                                    <div class="border rounded p-3 mb-2" data-anexo-id="{{ $anexo->id }}">
+                                        {{-- Preview simples para imagens --}}
+                                        @if (in_array(strtolower(pathinfo($anexo->nome_original, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif']))
+                                            <img src="{{ $anexo->url }}"
+                                                style="max-width: 100px; max-height: 100px; margin-bottom: 10px;"
+                                                class="d-block">
+                                        @elseif(strtolower(pathinfo($anexo->nome_original, PATHINFO_EXTENSION)) === 'pdf')
+                                            {{-- PDF --}}
+                                            <a href="{{ $anexo->url }}" class="text-decoration-none">
+                                                <div class="anexo-pdf-preview d-flex align-items-center justify-content-center"
+                                                    style="max-width: 100px; max-height: 100px; background: #f8f9fa; cursor: pointer;">
+                                                    <div class="text-center">
+                                                        <i class="fas fa-file-pdf fa-4x text-danger mb-2"></i>
+                                                        <div class="small text-muted">PDF</div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endif
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ $anexo->nome_original }}</strong>
+                                                <small class="text-muted d-block">{{ $anexo->tamanho_formatado }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ $anexo->url }}" target="_blank"
+                                                class="btn btn-sm btn-outline-primary">Ver</a>
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                onclick="removerAnexoExistente({{ $anexo->id }})"><i
+                                                    class="bi bi-trash"></i>Remover</button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
-            {{-- Dropzone simples --}}
-            <div class="mt-4">
-                <label class="form-label">Adicionar Novos Anexos</label>
-                <div id="dropzone-anexos" class="dropzone">
-                    <div class="dz-message">
-                        <div class="dz-button">
-                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i><br>
-                            Arraste arquivos aqui ou clique para selecionar
+                    {{-- Dropzone --}}
+                    <div class="mt-4">
+                        <label class="form-label">Adicionar Novos Anexos</label>
+                        <div id="dropzone-anexos" class="dropzone">
+                            <div class="dz-message">
+                                <div class="dz-button">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i><br>
+                                    Arraste arquivos aqui ou clique para selecionar
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        Arquivos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (máx. 10MB cada)
+                                    </small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                Arquivos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (máx. 10MB cada)
-                            </small>
+                        {{-- Lista de novos anexos --}}
+                        <div id="novos-anexos" style="display: none;">
+                            <h6 class="mt-3">Novos arquivos:</h6>
+                            <div id="lista-novos-anexos"></div>
                         </div>
+
+                        <div id="anexos-inputs"></div>
+                        <div id="anexos-removidos"></div>
                     </div>
-                </div>
-                {{-- Lista de novos anexos --}}
-                <div id="novos-anexos" style="display: none;">
-                    <h6 class="mt-3">Novos arquivos:</h6>
-                    <div id="lista-novos-anexos"></div>
-                </div>
 
-                <div id="anexos-inputs"></div>
-                <div id="anexos-removidos"></div>
+
+                    <div class="text-end mt-4">
+                        <a href="{{ route('notas.index') }}" class="btn btn-secondary">Voltar</a>
+                        <button type="submit" class="btn btn-primary-ed">
+                            Atualizar Nota
+                        </button>
+                    </div>
+                </form>
             </div>
-
-
-            <div class="text-end mt-4">
-                <a href="{{ route('notas.index') }}" class="btn btn-secondary">Voltar</a>
-                <button type="submit" class="btn btn-primary-ed">
-                    Atualizar Nota
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 
 @endsection
 
 @push('scripts')
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ===== CONFIGURAÇÃO DO QUILL =====
@@ -167,16 +166,46 @@
                 placeholder: 'Digite o conteúdo da nota...',
                 modules: {
                     toolbar: [
-                        [{'font': []}],
-                        [{'size': ['small', false, 'large', 'huge']}], // custom dropdown
+                        [{
+                            'font': []
+                        }],
+                        [{
+                            'size': ['small', false, 'large', 'huge']
+                        }], // custom dropdown
                         ['bold', 'italic', 'underline', 'strike'], // toggled buttons
-                        [{'color': []}, {'background': []}], // dropdown with defaults from theme
-                        [{'header': 1}, {'header': 2}], // custom button values
-                        [{'align': []}],
-                        [{'list': 'ordered'}, {'list': 'bullet'}, {'list': 'check'}],
-                        [{'script': 'sub'}, {'script': 'super'}], // superscript/subscript
-                        [{'indent': '-1'}, {'indent': '+1'}], // outdent/indent
-                        [{'direction': 'rtl'}], // text direction
+                        [{
+                            'color': []
+                        }, {
+                            'background': []
+                        }], // dropdown with defaults from theme
+                        [{
+                            'header': 1
+                        }, {
+                            'header': 2
+                        }], // custom button values
+                        [{
+                            'align': []
+                        }],
+                        [{
+                            'list': 'ordered'
+                        }, {
+                            'list': 'bullet'
+                        }, {
+                            'list': 'check'
+                        }],
+                        [{
+                            'script': 'sub'
+                        }, {
+                            'script': 'super'
+                        }], // superscript/subscript
+                        [{
+                            'indent': '-1'
+                        }, {
+                            'indent': '+1'
+                        }], // outdent/indent
+                        [{
+                            'direction': 'rtl'
+                        }], // text direction
                         ['blockquote', 'code-block'],
                         ['link'],
                         ['clean'] // remove formatting button

@@ -97,12 +97,30 @@
                                 @endforeach
                             </select>
                         </div>
-
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <a href="{{ route('notas.index') }}" class="btn btn-secondary">Limpar</a>
-                        <button type="submit" class="btn btn-primary-ed">Filtrar</button>
+                    {{-- Filtros de vencimento --}}
+                    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap">
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('notas.index') }}"
+                                class="badge rounded-pill px-2 py-1 me-1 {{ request('filtro') == null ? 'bg-white' : 'bg-white' }} text-black border border-dark text-decoration-none">
+                                Todas
+                            </a>
+
+                            <a href="{{ route('notas.index', ['filtro' => 'vencidas']) }}"
+                                class="badge rounded-pill px-2 py-1 me-1 {{ request('filtro') == 'vencidas' ? 'bg-danger' : 'bg-white' }} text-black border border-dark text-decoration-none">
+                                <i class="bi bi-exclamation-circle"></i> Vencidas
+                            </a>
+
+                            <a href="{{ route('notas.index', ['filtro' => 'ativas']) }}"
+                                class="badge rounded-pill px-2 py-1 me-1 {{ request('filtro') == 'ativas' ? 'bg-success' : 'bg-white' }} text-black border border-dark text-decoration-none">
+                                <i class="bi bi-check-circle"></i> Ativas
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2 mt-1">
+                            <a href="{{ route('notas.index') }}" class="btn btn-secondary">Limpar</a>
+                            <button type="submit" class="btn btn-primary-ed">Filtrar</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -221,7 +239,7 @@
 
                         {{-- Categoria --}}
                         <div class="mb-2 mt-3">
-                            <span class="">Categoria: {{ $nota->categoria->nome }}</span>
+                            <span>Categoria: {{ $nota->categoria->nome }}</span>
                         </div>
 
                         {{-- Tags --}}
@@ -299,20 +317,21 @@
                         @endif
                     </div>
 
-
+                    <hr>
+                    {{-- Ultima atualização --}}
+                    <div class="ps-3">
+                        <p class="mb-1"><strong>Última atualização:</strong>
+                            {{ $nota->updated_at->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}
+                        </p>
+                        @if ($nota->data_vencimento)
+                            <p class="mb-1"><strong>Data de vencimento:</strong>
+                                {{ $nota->data_vencimento->format('d/m/Y') }}
+                            </p>
+                        @endif
+                    </div>
                     {{-- Informações adicionais (aparecem apenas quando expandido) --}}
                     <div class="info-adicional d-none" id="info{{ $nota->id }}">
-                        <hr>
-                        <div class="p-3 rounded">
-                            <p class="mb-2"><strong>Última atualização:</strong>
-                                {{ $nota->updated_at->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}
-                            </p>
-                            @if ($nota->data_vencimento)
-                                <p class="mb-0"><strong>Data de vencimento:</strong>
-                                    {{ $nota->data_vencimento->format('d/m/Y') }}
-                                </p>
-                            @endif
-                        </div>
+
                     </div>
 
 
@@ -406,8 +425,6 @@
                 if (tituloResumido) tituloResumido.classList.add('d-none');
                 if (tituloCompleto) tituloCompleto.classList.remove('d-none');
 
-                // Mostrar informações adicionais
-                if (info) info.classList.remove('d-none');
 
                 // Atualizar botão
                 icon.className = 'bi bi-eye-slash';

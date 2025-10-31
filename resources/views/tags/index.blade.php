@@ -5,7 +5,7 @@
         <div class="card shadow rounded-4 h-100">
             <div class="card-header textColor d-flex justify-content-between align-items-center">
                 <h2 class="h4 textColor">Tags</h2>
-                <a href="{{ route('tags.create') }}" class="btn btn-primary-ed btn-sm">
+                <a href="{{ route('tags.create') }}" class="btn btn-primary-ed">
                     Nova Tag
                 </a>
             </div>

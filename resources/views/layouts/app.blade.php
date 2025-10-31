@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Bloco de notas') }}</title>
+    <title>{{ config('app.name', 'Mindly Notes') }}</title>
 
     <link rel="shortcut icon" href="{{ asset('img/borboleta.png') }}" type="image/png">
 
@@ -63,8 +63,8 @@
             @yield('slot')
         </main>
         <footer class="mt-3">
-            <div class="footer py-3 mt-auto">
-                <p class="text-center">© 2025 Bloco de Notas - Todos os direitos reservados.</p>
+            <div class="footer py-3 mt-auto shadow-sm">
+                <p class="text-center">© 2025 Mindly de Notes - Todos os direitos reservados.</p>
             </div>
         </footer>
 
@@ -81,4 +81,3 @@
 </body>
 
 </html>
-{{-- ipvc modularizar --}}
