@@ -16,9 +16,10 @@ class NotaExpiringNotification extends Notification
      * Create a new notification instance.
      */
     public function __construct(
-        public Nota $nota,
-        public int $diasRestantes
-    ) {}
+    public ?Nota $nota = null,
+    public ?int $diasRestantes = null
+) {}
+
 
     /**
      * Get the notification's delivery channels.
@@ -52,7 +53,6 @@ class NotaExpiringNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
 
-        // POR ESTA:
         $url = url('/notas?highlight=' . $this->nota->id);
 
         $subject = $this->diasRestantes === 0
@@ -63,7 +63,7 @@ class NotaExpiringNotification extends Notification
             ->subject($subject)
             ->greeting('Olá!')
             ->line("Sua nota \"{$this->nota->titulo}\" está próxima do vencimento.")
-            ->lineIf($this->diasRestantes === 0, '⚠️ **Esta nota vence hoje!**')
+            ->lineIf($this->diasRestantes == 0, '⚠️ **Esta nota vence hoje!**')
             ->lineIf($this->diasRestantes > 0, "📅 Vence em: **{$this->diasRestantes} dias**")
             ->line("Data de vencimento: {$this->nota->data_vencimento->format('d/m/Y')}")
             ->action('Ver Nota', $url)

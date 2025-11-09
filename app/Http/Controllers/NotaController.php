@@ -21,7 +21,13 @@ class NotaController extends Controller
 
     public function index(Request $request)
     {
+        // Captura o ID da nota para highlight (vindo do email ou outra fonte)
         $highlightId = $request->get('highlight');
+        
+        // Se tiver highlight, garante que é um número
+        if ($highlightId) {
+            $highlightId = intval($highlightId);
+        }
 
 
         $notasExcluidasCount = Nota::onlyTrashed()

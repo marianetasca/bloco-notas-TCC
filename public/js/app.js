@@ -116,13 +116,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
 //Notificação acessada pelo email
 document.addEventListener('DOMContentLoaded', function() {
     const highlightedNote = document.querySelector('.highlight-nota');
 
     if (highlightedNote) {
-        // Remove o highlight após 5 segundos
+        // Scroll suave até a nota destacada
+        highlightedNote.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        // Remove o highlight gradualmente
         setTimeout(() => {
             highlightedNote.classList.add('fade-out');
         }, 3000); // 3 segundos antes de começar a desaparecer

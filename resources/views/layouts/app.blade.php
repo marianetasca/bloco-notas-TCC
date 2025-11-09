@@ -64,7 +64,7 @@
         </main>
         <footer class="mt-3">
             <div class="footer py-3 mt-auto shadow-sm">
-                <p class="text-center">© 2025 Mindly de Notes - Todos os direitos reservados.</p>
+                <p class="text-center">© 2025 Mindly Notes - Todos os direitos reservados.</p>
             </div>
         </footer>
 

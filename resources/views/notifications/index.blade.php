@@ -77,7 +77,7 @@
                     @endforeach
                 </div>
 
-                <div class="mt-3">
+                <div class="d-sm-block justify-content-center mt-4">
                     {{ $notifications->links() }}
                 </div>
             @endif
