@@ -19,9 +19,8 @@ class NotificationController extends Controller
         return view('notifications.index', compact('notifications'));
     }
 
-    /**
-     * Buscar notificações não lidas (para AJAX)
-     */
+    /*======== Método unread ========*/
+    //Buscar notificações não lidas (para AJAX)
     public function unread(Request $request): JsonResponse
     {
         $unreadNotifications = $request->user()
@@ -35,9 +34,8 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Marcar notificação como lida
-     */
+    /*======== Método markAsRead ========*/
+    // Marcar notificação como lida
     public function markAsRead(Request $request, string $id)
     {
         $notification = $request->user()
@@ -49,9 +47,8 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
-    /**
-     * Marcar todas como lidas
-     */
+    /*======== Método markAllRead ========*/
+    // Marcar todas como lidas
     public function markAllAsRead(Request $request)
     {
         $request->user()->unreadNotifications->markAsRead();
@@ -59,9 +56,8 @@ class NotificationController extends Controller
         return back()->with('success', 'Todas as notificações foram marcadas como lidas.');
     }
 
-    /**
-     * Apagar uma notificação específica
-     */
+    /*======== Método destroy ========*/
+    // Apagar uma notificação específica
     public function destroy(Request $request, string $id)
     {
         $notification = $request->user()
@@ -76,9 +72,8 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Apagar todas as notificações
-     */
+    /*======== Método deleteAll ========*/
+    // Apagar todas as notificações
     public function deleteAll(Request $request)
     {
         $request->user()->notifications()->delete();

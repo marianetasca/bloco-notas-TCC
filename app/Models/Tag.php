@@ -15,9 +15,7 @@ class Tag extends Model
         'user_id'
     ];
 
-    /**
-     * Relacionamento: A tag pode estar associada a muitas notas.
-     */
+    // Relacionamento: A tag pode estar associada a muitas notas.
     public function notas()
     {
         return $this->belongsToMany(Nota::class);

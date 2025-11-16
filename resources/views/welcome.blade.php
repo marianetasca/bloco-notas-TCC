@@ -362,9 +362,33 @@
                     </div>
                 </div>
             </div>
+            {{-- Feature 4: Estatísticas --}}
+            <div class="row align-items-center mb-5 pb-5 flex-lg-row-reverse">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="feature-icon">
+                        <i class="bi bi-bar-chart"></i>
+                    </div>
+                    <h3 class="fw-bold mb-3">Dashboard com Estatísticas</h3>
+                    <p class="lead text-muted mb-4">
+                        Visualize suas notas de forma inteligente com gráficos interativos.
+                        Acompanhe seu progresso e produtividade.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Gráficos por categoria</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Análise por prioridade</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Status de notas (concluídas, pendentes, vencidas)</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Filtros por período (mês/ano)</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <div class="screenshot-placeholder">
+                        <img src="{{ asset('img/estatisticas.png') }}" alt="Dashboard de Estatísticas">
+                    </div>
+                </div>
+            </div>
 
             {{-- Feature 4: Lixeira --}}
-            <div class="row align-items-center flex-lg-row-reverse">
+            <div class="row align-items-center">
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="feature-icon">
                         <i class="bi bi-trash"></i>

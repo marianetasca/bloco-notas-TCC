@@ -24,7 +24,7 @@ class Prioridade extends Model
     }
 
     /**
-     * Acessor para obter a classe CSS baseada na cor
+     * Acessor para obter a classe CSS baseada na cor // nao levei adiante essa ideia
      */
     public function getClasseCssAttribute()
     {

@@ -8,9 +8,7 @@ use Illuminate\View\View;
 
 class NotificationPreferencesController extends Controller
 {
-    /**
-     * Exibir as preferências de notificação
-     */
+    // Exibir as preferências de notificação
     public function edit(Request $request): View
     {
         $user = $request->user();
@@ -21,9 +19,7 @@ class NotificationPreferencesController extends Controller
         ]);
     }
 
-    /**
-     * Atualizar as preferências de notificação
-     */
+    // Atualizar as preferências de notificação
     public function update(Request $request): RedirectResponse
     {
 

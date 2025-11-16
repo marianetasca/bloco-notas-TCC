@@ -15,6 +15,7 @@ class AnexoController extends Controller
      */
     /** @var int $userId */
 
+    /*======== Método upload ========*/
     public function upload(Request $request)
     {
         $request->validate([
@@ -51,9 +52,9 @@ class AnexoController extends Controller
         }
     }
 
-    /**
-     * Remove anexo temporário via Dropzone
-     */
+
+    //Remove anexo temporário via Dropzone
+    /*======== Método remove ========*/
     public function remove(Anexo $anexo)  // ← Laravel injeta automaticamente o anexo pela URL
     {
         try {
@@ -114,9 +115,8 @@ class AnexoController extends Controller
         }
     }
 
-    /**
-     * Exclui anexo de uma nota específica
-     */
+    /*======== Método destroy ========*/
+    //Exclui anexo de uma nota específica
     public function destroy(Nota $nota, Anexo $anexo)
     {
         // Verifica permissão
@@ -148,9 +148,8 @@ class AnexoController extends Controller
         }
     }
 
-    /**
-     * Associa anexos temporários a uma nota
-     */
+    /*======== Método associar à nota ========*/
+     //Associa anexos temporários a uma nota
     public function associarANota($notaId, array $anexosIds)
     {
         if (empty($anexosIds)) {
@@ -163,9 +162,8 @@ class AnexoController extends Controller
             ->update(['nota_id' => $notaId]);
     }
 
-    /**
-     * Remove anexos marcados para remoção
-     */
+    /*======== Método removerAnexosIds ========*/
+     //Remove anexos marcados para remoção
     public function removerAnexosIds(array $anexosIds, $notaId)
     {
         if (empty($anexosIds)) {
@@ -194,9 +192,8 @@ class AnexoController extends Controller
         return true;
     }
 
-    /**
-     * Limpa anexos temporários antigos
-     */
+    /*======== Método limparTemporarios ========*/
+    //Limpa anexos temporários antigos
     public function limparTemporarios()
     {
         try {
@@ -228,9 +225,8 @@ class AnexoController extends Controller
         }
     }
 
-    /**
-     * Método helper para formatar tamanho
-     */
+    /*======== Método formatarTamanho ========*/
+    //Método helper para formatar tamanho
     private function formatarTamanho($bytes)
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];

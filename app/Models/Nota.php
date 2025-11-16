@@ -32,33 +32,33 @@ class Nota extends Model
     ];
 
 
-    /**
-     * Relacionamento: A nota pertence a um usuário.
-     */
+
+    // Relacionamento: A nota pertence a um usuário.
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relacionamento: A nota pertence a uma categoria.
-     */
+
+    // Relacionamento: A nota pertence a uma categoria.
+
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
     }
 
-    /**
-     * Relacionamento: A nota pode ter muitas tags.
-     */
+
+    // Relacionamento: A nota pode ter muitas tags.
+
     public function tags()
     {
         return $this->belongsToMany(Tag::class, 'nota_tag', 'nota_id', 'tag_id');
     }
 
-    /**
-     * Relacionamento: A nota pertence a uma prioridade.
-     */
+
+    // Relacionamento: A nota pertence a uma prioridade.
+
     public function prioridade()
     {
         return $this->belongsTo(Prioridade::class);
@@ -91,16 +91,13 @@ class Nota extends Model
         };
     }
 
-        //   Verifica se a nota tem anexos.
-
+    // Verifica se a nota tem anexos.
     public function hasAnexos()
     {
         return $this->anexos()->count() > 0;
     }
 
-    /**
-     * Conta total de anexos.
-     */
+    // Conta total de anexos.
     public function getTotalAnexosAttribute()
     {
         return $this->anexos()->count();
@@ -112,9 +109,7 @@ class Nota extends Model
         return $query->has('anexos');
     }
 
-    /**
-     * Scope para notas sem anexos.
-     */
+    // Scope para notas sem anexos.
     public function scopeSemAnexos($query)
     {
         return $query->doesntHave('anexos');

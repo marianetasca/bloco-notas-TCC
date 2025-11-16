@@ -51,25 +51,25 @@ class User extends Authenticatable //implements MustVerifyEmail
         ];
     }
 
-    /**
-     * Relacionamento com Notas
-     */
+
+    // Relacionamento com Notas
+
     public function notas()
     {
         return $this->hasMany(Nota::class);
     }
 
-    /**
-     * Verifica se o usuário quer receber notificações
-     */
+
+    // Verifica se o usuário quer receber notificações
+
     public function recebeNotificacoes(): bool
     {
         return $this->notificacoes_ativas;
     }
 
-    /**
-     * Verifica se quer receber por email
-     */
+
+    // Verifica se quer receber por email
+
     public function recebeNotificacoesPorEmail(): bool
     {
         if (!$this->recebeNotificacoes()) {
@@ -80,9 +80,9 @@ class User extends Authenticatable //implements MustVerifyEmail
         return $preferencias['email'] ?? true; // Default true
     }
 
-    /**
-     * Verifica se quer receber por WhatsApp (futuro)
-     */
+
+    // Verifica se quer receber por WhatsApp (futuro)
+
     public function recebeNotificacoesPorWhatsapp(): bool
     {
         if (!$this->recebeNotificacoes()) {
@@ -93,9 +93,9 @@ class User extends Authenticatable //implements MustVerifyEmail
         return ($preferencias['whatsapp'] ?? false) && !empty($this->telefone);
     }
 
-    /**
-     * Configuração padrão de preferências
-     */
+
+    // Configuração padrão de preferências
+
     public function getPreferenciasNotificacaoAttribute($value)
     {
         $decoded = json_decode($value, true) ?? [];
