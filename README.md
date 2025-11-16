@@ -319,8 +319,8 @@ DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=bloco_notas
-DB_USERNAME=seu_usuario
-DB_PASSWORD=sua_senha
+DB_USERNAME=root
+DB_PASSWORD=
 ``` 
 
 ## 6. Executar as migrations
@@ -342,8 +342,11 @@ npm run dev
 ```bash
 php artisan serve
 ```
-Nota: para que seja possível salvar os anexos no banco de dados é preciso criar o link símbolico do storage 
 
+Nota: para que seja possível salvar os anexos no banco de dados é preciso criar o link símbolico do storage 
+```bash
+php artisan storage:link
+```
 
 ### Acesse a aplicação em: http://localhost:8000
 
