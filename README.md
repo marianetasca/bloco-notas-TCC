@@ -308,11 +308,16 @@ composer install
 ```bash
 npm install
 ```
+## 4. Configure o arquivo de ambiente
+Copie o arquivo .env.example para .env:
+```bash
+cp .env.example .env
+```
 
-## 4. Criar o banco de dados
+## 5. Criar o banco de dados
 no xammp start o Apache e o MySql, entre no admin do MySql, clique em Novo, preencha o nome do seu banco de dados e clique em "criar".
 
-## 5. Configure o arquivo de ambiente
+## 6. Configure o arquivo de ambiente
 Edite o arquivo .env com suas configurações de banco de dados:
 ```env
 DB_CONNECTION=mysql
@@ -322,28 +327,29 @@ DB_DATABASE=bloco_notas
 DB_USERNAME=root
 DB_PASSWORD=
 ``` 
+### ⚠️ Importante: Se aparecer erro ao executar comandos php artisan, feche o VSCode completamente e abra novamente para recarregar as configurações do ambiente.
 
-## 6. Executar as migrations
+## 7. Executar as migrations
 ```bash
 php artisan migrate
 ```
 
-## 7. Gere a chave da aplicação
+## 8. Gere a chave da aplicação
 ```bash
 php artisan key:generate
 ```
 
-## 8. Compile os assets
+## 9. Compile os assets
 ```bash
 npm run dev
 ```
 
-## 9. Inicie o servidor
+## 10. Inicie o servidor
 ```bash
 php artisan serve
 ```
 
-Nota: para que seja possível salvar os anexos no banco de dados é preciso criar o link símbolico do storage 
+## 11. para que seja possível salvar os anexos no banco de dados é preciso criar o link símbolico do storage 
 ```bash
 php artisan storage:link
 ```
@@ -357,3 +363,4 @@ Hospedado no HostGator, com código disponível em:
 - 🔗 https://github.com/marianetasca/bloco-notas-TCC.git
 - 🔗 https://mindlynotes.com.br
 
+ 
