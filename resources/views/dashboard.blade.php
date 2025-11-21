@@ -6,8 +6,19 @@
         {{-- Filtros (data, mês, ano) --}}
         <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-end gap-2 mb-4">
             <div class="row g-3">
+                {{-- Filtro por (vencimento/ criação) --}}
+                <div class="col-md-2 col-6 w-auto">
+                    <select name="filtro_por" class="form-select">
+                        <option value="vencimento"
+                            {{ (request('filtro_por') ?? 'vencimento') == 'vencimento' ? 'selected' : '' }}>Data de
+                            vencimento</option>
+                        <option value="criacao" {{ request('filtro_por') == 'criacao' ? 'selected' : '' }}>Data de criação
+                        </option>
+                    </select>
+                </div>
+
                 {{-- Data --}}
-                <div class="col-md-3 col-6 min-w-4 w-auto">
+                <div class="col-md-2 col-6 min-w-4 w-auto">
                     <input type="date" name="data" class="form-control" value="{{ request('data') }}">
                 </div>
 
@@ -35,7 +46,8 @@
                     </select>
                 </div>
 
-                <div class="col-md-3 col-6 w-auto">
+                <div class="col-md-2 col-6 w-auto">
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary">Limpar</a>
                     <button type="submit" class="btn btn-primary-ed">Filtrar</button>
                 </div>
             </div>
@@ -131,4 +143,69 @@
             }
         });
     </script>
+
+    {{-- Lista de notas filtradas --}}
+    <div class="container py-4">
+        <div class="card">
+            <h5 class="card-header">Notas</h5>
+            <div class="card-body">
+                @if ($notas->isEmpty())
+                    <p class="text-muted">Nenhuma nota encontrada com os filtros selecionados.</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Categoria</th>
+                                    <th>Prioridade</th>
+                                    <th>Vencimento</th>
+                                    <th>Status</th>
+                                    <th>Tags</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($notas as $nota)
+                                    <tr
+                                        class="{{ isset($highlightId) && $highlightId == $nota->id ? 'highlight-nota' : '' }}">
+                                        <td id="nota-{{ $nota->id }}" class="td-title" title="{{ $nota->titulo }}">
+                                            <a href="{{ route('notas.index', ['highlight' => $nota->id]) }}"
+                                                class="d-inline-block text-truncate" style="max-width:240px;">
+                                                {{ $nota->titulo }}
+                                            </a>
+                                        </td>
+                                        <td>{{ $nota->categoria->nome ?? '-' }}</td>
+                                        <td>{{ $nota->prioridade->nome ?? '-' }}</td>
+                                        <td>{{ $nota->data_vencimento ? $nota->data_vencimento->format('d/m/Y') : '-' }}
+                                        </td>
+                                        <td>
+                                            @if ($nota->concluido)
+                                                <span class="badge bg-success">Concluída</span>
+                                            @elseif($nota->data_vencimento && $nota->data_vencimento < now())
+                                                <span class="badge bg-danger">Vencida</span>
+                                            @else
+                                                <span class="badge bg-warning text-dark">Pendente</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($nota->tags && $nota->tags->isNotEmpty())
+                                                {{ $nota->tags->pluck('nome')->join(', ') }}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                        {{ $notas->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
 @endsection

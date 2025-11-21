@@ -129,7 +129,7 @@
         {{-- Lista de Notas --}}
         @forelse($notas as $nota)
             <div class="mb-4">
-                <div
+                <div id="nota-{{ $nota->id }}"
                     class="card h-100 shadow-sm w-100  {{ isset($highlightId) && $highlightId == $nota->id ? 'highlight-nota' : '' }}">
                     <div class="card-body d-flex flex-column position-relative">
                         <h5 class="card-title pb-1 pe-5 text-truncate" id="tituloResumido{{ $nota->id }}"
@@ -525,6 +525,29 @@
                     behavior: prefersReduced ? "auto" : "smooth",
                 });
             });
+        });
+
+        // Detecta fragment #nota-X e aplica highlight + scroll
+        window.addEventListener('load', function() {
+            try {
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#nota-')) {
+                    // Pequeno delay para garantir que o DOM está pronto
+                    setTimeout(() => {
+                        const el = document.querySelector(hash);
+                        if (el) {
+                            el.classList.add('highlight-nota');
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Remove highlight após 5 segundos
+                            setTimeout(() => {
+                                el.classList.remove('highlight-nota');
+                            }, 5000);
+                        }
+                    }, 100);
+                }
+            } catch (e) {
+                // ignore
+            }
         });
     </script>
 

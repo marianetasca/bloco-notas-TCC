@@ -29,7 +29,6 @@ class NotaController extends Controller
             $highlightId = intval($highlightId);
         }
 
-
         $notasExcluidasCount = Nota::onlyTrashed()
             ->where('user_id', auth()->id())
             ->count();
@@ -103,6 +102,36 @@ class NotaController extends Controller
         $ordem = $request->input('ordem', 'desc');
         $query->orderBy('created_at', $ordem);
 
+        // Se há highlight e a nota é válida, calcular página e redirecionar
+        if ($highlightId) {
+            $notaHighlight = Nota::where('id', $highlightId)
+                ->where('user_id', auth()->id())
+                ->first();
+            
+            if ($notaHighlight) {
+                // Contar quantas notas vêm antes da nota com highlight
+                $posicao = (clone $query)
+                    ->where('created_at', '>', $notaHighlight->created_at)
+                    ->orWhere(function ($q) use ($notaHighlight) {
+                        $q->where('created_at', '=', $notaHighlight->created_at)
+                            ->where('id', '<', $notaHighlight->id);
+                    })
+                    ->count();
+                
+                // Calcular página (dividir por 10 itens por página)
+                $page = floor($posicao / 10) + 1;
+                
+                // Redirecionar para a página correta com o anchor (remover parâmetro highlight para evitar loop)
+                $queryParams = $request->query();
+                unset($queryParams['highlight']);
+                $queryParams['page'] = $page;
+                
+                $url = route('notas.index', $queryParams) . "#nota-{$highlightId}";
+                
+                return redirect()->to($url);
+            }
+        }
+
         // Paginação (10 itens por página)
         $notas = $query->paginate(10)->withQueryString();
         $categorias = Categoria::where('user_id', auth()->id())->get();
@@ -116,7 +145,6 @@ class NotaController extends Controller
             ->groupBy('prioridade_id')
             ->with('prioridade')
             ->get();
-
 
         return view('notas.index', compact('notas', 'highlightId', 'categorias', 'tags', 'prioridades', 'notasPorPrioridade', 'notasExcluidasCount'));
     }
