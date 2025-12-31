@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\NotificationPreferencesController;
+use App\Http\Controllers\CompartilharController;
 use Illuminate\Support\Facades\Route;
 
 /* ROTAS ESPECÍFICAS PRIMEIRO
@@ -62,7 +63,7 @@ Route::middleware(['auth'])->group(function () { //auth porque o usuario precisa
     Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
     Route::delete('/notifications/delete-all', [NotificationController::class, 'deleteAll'])->name('notifications.delete-all');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
-    
+
     // Rotas genericas (notificações)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -76,4 +77,13 @@ Route::middleware(['auth'])->group(function () { //auth porque o usuario precisa
     Route::resource('notas', NotaController::class);
     Route::resource('tags', TagController::class);
     Route::resource('categorias', CategoriaController::class);
+
+    // Rota para receber compartilhamentos (PWA Share Target)
+    Route::post('/compartilhar-comprovante', [CompartilharController::class, 'receberCompartilhamento'])
+        ->name('compartilhar.receber');
+
+    // Rota para processar compartilhamento após login
+    Route::get('/processar-compartilhamento', [CompartilharController::class, 'processarCompartilhamentoPendente'])
+        ->middleware('auth')
+        ->name('compartilhar.processar');
 });

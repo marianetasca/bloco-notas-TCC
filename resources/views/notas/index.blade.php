@@ -3,6 +3,10 @@
 @section('slot')
     <div class="container pt-4">
 
+        <button id="install-button" style="display: none;" class="btn btn-primary">
+            📱 Instalar App
+        </button>
+
         {{-- Cabeçalho --}}
         <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
             <h2 class="mb-0 textColor">Minhas Notas</h2>
@@ -537,7 +541,10 @@
                         const el = document.querySelector(hash);
                         if (el) {
                             el.classList.add('highlight-nota');
-                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            el.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
                             // Remove highlight após 5 segundos
                             setTimeout(() => {
                                 el.classList.remove('highlight-nota');

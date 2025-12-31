@@ -35,38 +35,57 @@
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.css" rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"rel="stylesheet">
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"rel="stylesheet">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4A90E2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mindly Notes">
+
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-192x192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png">
 
     @stack('styles')
 
 </head>
 
 <body class="custom-body d-flex flex-column min-vh-100">
-        @include('layouts.navigation')
+    @include('layouts.navigation')
 
-        <main class="container mt-5 pt-4 flex-grow-1">
-            <!-- ALERTAS GLOBAIS - funcionam em qualquer página -->
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            @yield('slot')
-        </main>
-        <footer class="mt-3">
-            <div class="footer py-3 mt-auto shadow-sm">
-                <p class="text-center">© 2025 Mindly Notes - Todos os direitos reservados.</p>
+    <main class="container mt-5 pt-4 flex-grow-1">
+        <!-- ALERTAS GLOBAIS - funcionam em qualquer página -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        </footer>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @yield('slot')
+    </main>
+    <footer class="mt-3">
+        <div class="footer py-3 mt-auto shadow-sm">
+            <p class="text-center">© 2025 Mindly Notes - Todos os direitos reservados.</p>
+        </div>
+    </footer>
 
 
     <!-- Bootstrap JS (via CDN) + dependências -->
@@ -76,6 +95,8 @@
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
+
+    <script src="{{ asset('js/pwa-register.js') }}" defer></script>
 
     @stack('scripts')
 </body>
