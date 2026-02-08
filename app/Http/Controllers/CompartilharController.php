@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Nota;
 use App\Models\Anexo;
+use App\Models\Categoria;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,104 +16,105 @@ class CompartilharController extends Controller
      */
     public function receberCompartilhamento(Request $request)
     {
-        // Log básico para debug — registra headers, cookies e se há arquivo
-        \Log::info('receberCompartilhamento called', [
-            'path' => $request->path(),
-            'method' => $request->method(),
-            'headers' => [
-                'content-type' => $request->header('content-type'),
-                'cookie' => $request->header('cookie'),
-                'user-agent' => $request->header('user-agent')
-            ],
-            'has_file' => $request->hasFile('arquivo'),
-        ]);
-
         // Verificar se usuário está autenticado
         if (!Auth::check()) {
-            // Salvar dados na sessão e redirecionar para login
-            // IMPORTANTE: não armazenamos o UploadedFile diretamente na sessão (não serializável).
-            // Em vez disso, vamos salvar o arquivo temporariamente em 'public/compartilhamentos_tmp'
-            $data = [
-                'title' => $request->input('title'),
-                'text' => $request->input('text'),
-                'arquivo_path' => null,
-                'arquivo_original_name' => null,
-                'arquivo_mime' => null,
-                'arquivo_size' => null,
-            ];
-
-            if ($request->hasFile('arquivo')) {
-                // Validar arquivo antes de salvar temporariamente
-                $request->validate([
-                    'arquivo' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx'
-                ]);
-
-                $file = $request->file('arquivo');
-                // Salva no disco 'public' em pasta temporária
-                $path = $file->store('compartilhamentos_tmp', 'public');
-
-                $data['arquivo_path'] = $path;
-                $data['arquivo_original_name'] = $file->getClientOriginalName();
-                $data['arquivo_mime'] = $file->getMimeType();
-                $data['arquivo_size'] = $file->getSize();
-            }
-
+            // Salvar na sessão para processar após login
             session([
-                'compartilhamento_pendente' => $data
+                'compartilhamento_pendente' => true,
+                'compartilhamento_title' => $request->input('title'),
+                'compartilhamento_text' => $request->input('text'),
             ]);
-
+            
+            // Se tiver arquivo, salvar temporariamente
+            if ($request->hasFile('arquivo')) {
+                $arquivo = $request->file('arquivo');
+                $caminhoTemp = $arquivo->store('temp', 'public');
+                
+                session([
+                    'compartilhamento_arquivo_temp' => $caminhoTemp,
+                    'compartilhamento_arquivo_nome' => $arquivo->getClientOriginalName(),
+                ]);
+            }
+            
             return redirect()->route('login')
                 ->with('info', 'Faça login para salvar o comprovante compartilhado.');
         }
 
+        // Se já está autenticado, processar compartilhamento
+        return $this->mostrarOpcoes($request);
+    }
+
+    /**
+     * Mostra opções de como salvar o comprovante
+     */
+    public function mostrarOpcoes(Request $request)
+    {
+        // Se tiver arquivo, salvar temporariamente
+        if ($request->hasFile('arquivo')) {
+            $arquivo = $request->file('arquivo');
+            $caminhoTemp = $arquivo->store('temp', 'public');
+            
+            session([
+                'compartilhamento_arquivo_temp' => $caminhoTemp,
+                'compartilhamento_arquivo_nome' => $arquivo->getClientOriginalName(),
+                'compartilhamento_title' => $request->input('title'),
+                'compartilhamento_text' => $request->input('text'),
+            ]);
+        }
+
+        // Buscar categorias e notas do usuário
+        $categorias = Categoria::where('user_id', Auth::id())->get();
+        $notas = Nota::where('user_id', Auth::id())
+            ->orderBy('updated_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        // Se não tem categorias, criar uma padrão
+        if ($categorias->isEmpty()) {
+            $categorias = collect([
+                Categoria::create([
+                    'user_id' => Auth::id(),
+                    'nome' => 'Geral'
+                ])
+            ]);
+        }
+
+        return view('compartilhar.escolher-opcao', compact('categorias', 'notas'));
+    }
+
+    /**
+     * Salvar em nova nota
+     */
+    public function salvarNovaNota(Request $request)
+    {
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:150',
+            'conteudo' => 'nullable|string',
+            'categoria_id' => 'required|exists:categorias,id',
+            'prioridade_id' => 'required|exists:prioridades,id',
+        ]);
+
         try {
-            // Criar nova nota
+            // Criar nota
             $nota = new Nota();
             $nota->user_id = Auth::id();
-
-            // Definir título
-            $titulo = $request->input('title', 'Comprovante compartilhado');
-            if (empty($titulo)) {
-                $titulo = 'Comprovante ' . now()->format('d/m/Y H:i');
-            }
-            $nota->titulo = $titulo;
-
-            // Definir conteúdo se houver texto
-            $texto = $request->input('text', '');
-            if (!empty($texto)) {
-                $nota->conteudo = $texto;
-            }
-
+            $nota->titulo = $validated['titulo'];
+            $nota->conteudo = $validated['conteudo'] ?? 'Comprovante compartilhado via app.';
+            $nota->categoria_id = $validated['categoria_id'];
+            $nota->prioridade_id = $validated['prioridade_id'];
             $nota->save();
 
-            // Processar arquivo anexado
-            if ($request->hasFile('arquivo')) {
-                $arquivo = $request->file('arquivo');
-
-                // Validar arquivo
-                $request->validate([
-                    'arquivo' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx'
-                ]);
-
-                // Salvar arquivo no disco público (em pasta do usuário)
-                $caminhoArquivo = $arquivo->store('anexos/' . Auth::id(), 'public');
-                $nomeOriginal = $arquivo->getClientOriginalName();
-
-                // Criar registro de anexo (compatível com o modelo Anexo)
-                $anexo = new Anexo();
-                $anexo->nota_id = $nota->id;
-                $anexo->user_id = Auth::id();
-                $anexo->nome_original = $nomeOriginal;
-                $anexo->caminho = $caminhoArquivo;
-                $anexo->tipo_mime = $arquivo->getMimeType();
-                $anexo->tamanho = $arquivo->getSize();
-                $anexo->save();
+            // Processar arquivo temporário se existir
+            if (session()->has('compartilhamento_arquivo_temp')) {
+                $this->anexarArquivo($nota->id);
             }
 
+            // Limpar sessão
+            $this->limparSessao();
 
             return redirect()->route('notas.show', $nota->id)
-                ->with('success', 'Comprovante salvo com sucesso!');
-
+                ->with('success', 'Comprovante salvo em nova nota com sucesso!');
+                
         } catch (\Exception $e) {
             return redirect()->route('notas.index')
                 ->with('error', 'Erro ao salvar comprovante: ' . $e->getMessage());
@@ -120,51 +122,79 @@ class CompartilharController extends Controller
     }
 
     /**
-     * Processar compartilhamento pendente após login
+     * Anexar a nota existente
      */
-    public function processarCompartilhamentoPendente()
+    public function anexarExistente(Request $request)
     {
-        if (!session()->has('compartilhamento_pendente')) {
-            return redirect()->route('notas.index');
-        }
-
-        $dados = session('compartilhamento_pendente');
-        session()->forget('compartilhamento_pendente');
+        $validated = $request->validate([
+            'nota_id' => 'required|exists:notas,id',
+        ]);
 
         try {
-            // Criar nova nota
-            $nota = new Nota();
-            $nota->user_id = Auth::id();
-            $nota->titulo = $dados['title'] ?? 'Comprovante compartilhado';
-            $nota->conteudo = $dados['text'] ?? '';
-            $nota->save();
+            // Verificar se a nota pertence ao usuário
+            $nota = Nota::where('id', $validated['nota_id'])
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
 
-            // Se houver arquivo temporário, mover para pasta do usuário e criar anexo
-            if (!empty($dados['arquivo_path']) && Storage::disk('public')->exists($dados['arquivo_path'])) {
-                $oldPath = $dados['arquivo_path'];
-                $filename = basename($oldPath);
-                $newPath = 'anexos/' . Auth::id() . '/' . $filename;
-
-                // Mover para pasta final
-                Storage::disk('public')->move($oldPath, $newPath);
-
-                // Criar registro de anexo
-                $anexo = new Anexo();
-                $anexo->nota_id = $nota->id;
-                $anexo->user_id = Auth::id();
-                $anexo->nome_original = $dados['arquivo_original_name'] ?? $filename;
-                $anexo->caminho = $newPath;
-                $anexo->tipo_mime = $dados['arquivo_mime'] ?? Storage::disk('public')->mimeType($newPath);
-                $anexo->tamanho = $dados['arquivo_size'] ?? Storage::disk('public')->size($newPath);
-                $anexo->save();
+            // Processar arquivo temporário
+            if (session()->has('compartilhamento_arquivo_temp')) {
+                $this->anexarArquivo($nota->id);
             }
 
-            return redirect()->route('notas.show', $nota->id)
-                ->with('success', 'Comprovante salvo com sucesso!');
+            // Limpar sessão
+            $this->limparSessao();
 
+            return redirect()->route('notas.show', $nota->id)
+                ->with('success', 'Comprovante anexado à nota com sucesso!');
+                
         } catch (\Exception $e) {
             return redirect()->route('notas.index')
-                ->with('error', 'Erro ao processar compartilhamento.');
+                ->with('error', 'Erro ao anexar comprovante: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Anexar arquivo à nota
+     */
+    private function anexarArquivo($notaId)
+    {
+        $caminhoTemp = session('compartilhamento_arquivo_temp');
+        $nomeOriginal = session('compartilhamento_arquivo_nome');
+
+        if (!$caminhoTemp || !Storage::disk('public')->exists($caminhoTemp)) {
+            return;
+        }
+
+        // Mover arquivo da pasta temp para anexos
+        $novoCaminho = str_replace('temp/', 'anexos/', $caminhoTemp);
+        Storage::disk('public')->move($caminhoTemp, $novoCaminho);
+
+        // Obter informações do arquivo
+        $caminhoCompleto = Storage::disk('public')->path($novoCaminho);
+        $tamanho = filesize($caminhoCompleto);
+        $mimeType = mime_content_type($caminhoCompleto);
+
+        // Criar registro de anexo
+        $anexo = new Anexo();
+        $anexo->nota_id = $notaId;
+        $anexo->nome_arquivo = $nomeOriginal;
+        $anexo->caminho_arquivo = $novoCaminho;
+        $anexo->tipo_arquivo = $mimeType;
+        $anexo->tamanho = $tamanho;
+        $anexo->save();
+    }
+
+    /**
+     * Limpar dados da sessão
+     */
+    private function limparSessao()
+    {
+        session()->forget([
+            'compartilhamento_pendente',
+            'compartilhamento_title',
+            'compartilhamento_text',
+            'compartilhamento_arquivo_temp',
+            'compartilhamento_arquivo_nome',
+        ]);
     }
 }
