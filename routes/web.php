@@ -26,6 +26,46 @@ Route::get('/', function () {
 
 require __DIR__ . '/auth.php'; //autenticação breeze
 
+// DEBUG: rota temporária que aceita qualquer método em /compartilhar-comprovante e registra o request
+// (use para verificar se o navegador está realmente fazendo o POST e o que chega ao servidor)
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+Route::match(['GET','POST','OPTIONS','PUT','DELETE'], '/compartilhar-comprovante', function (Request $request) {
+    Log::info('compartilhar-comprovante debug', [
+        'method' => $request->method(),
+        'headers' => $request->headers->all(),
+        'has_file' => $request->hasFile('arquivo'),
+        'cookies' => $request->cookie()
+    ]);
+
+    return response()->json(['debug' => true, 'received' => true]);
+})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// Rota pública para receber compartilhamentos (Web Share Target)
+// Deve ser pública porque o navegador irá postar antes do usuário estar logado.
+Route::post('/compartilhar-comprovante', [CompartilharController::class, 'receberCompartilhamento'])
+    ->name('compartilhar.receber')
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// Página de teste (GET) com um formulário para POST manualmente
+Route::get('/compartilhar-teste', function () {
+    return view('compartilhar_teste');
+});
+
+// Rota temporária de debug: registra os headers e retorna 200 para verificar se o
+// POST chega ao servidor (sem CSRF)
+Route::post('/compartilhar-teste', function (\Illuminate\Http\Request $request) {
+    \Log::info('compartilhar-teste received', [
+        'path' => $request->path(),
+        'method' => $request->method(),
+        'headers' => $request->headers->all(),
+        'has_file' => $request->hasFile('arquivo')
+    ]);
+
+    return response()->json(['ok' => true]);
+})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
 Route::middleware(['auth'])->group(function () { //auth porque o usuario precisa estar logado para acessar qualquer rota a baixo
 
     // Dashboard
@@ -79,8 +119,8 @@ Route::middleware(['auth'])->group(function () { //auth porque o usuario precisa
     Route::resource('categorias', CategoriaController::class);
 
     // Rota para receber compartilhamentos (PWA Share Target)
-    Route::post('/compartilhar-comprovante', [CompartilharController::class, 'receberCompartilhamento'])
-        ->name('compartilhar.receber');
+    // NOTE: agora a rota pública foi definida fora do grupo `auth` para que o browser
+    // possa postar o arquivo mesmo que o usuário não esteja autenticado.
 
     // Rota para processar compartilhamento após login
     Route::get('/processar-compartilhamento', [CompartilharController::class, 'processarCompartilhamentoPendente'])

@@ -39,6 +39,7 @@
 
                 {{-- Para ficar um do lado do outro em telas menores --}}
                 <div class="d-flex align-items-center justify-content-start gap-2 flex-nowrap pb-3 p-lg-1" style="min-width: 0;">
+@auth
                     {{-- Ícone de notificações --}}
                     <div class="position-relative d-inline-block pe-4">
                         <a href="{{ route('notifications.index') }}">
@@ -62,6 +63,12 @@
                             <button type="submit" class="btn user-link logout">Sair</button>
                         </form>
                     </div>
+@else
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ route('login') }}" class="btn btn-link">Entrar</a>
+                        <a href="{{ route('register') }}" class="btn btn-primary">Criar conta</a>
+                    </div>
+@endauth
                 </div>
             </div>
         </div>

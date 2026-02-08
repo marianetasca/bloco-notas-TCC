@@ -3,10 +3,6 @@
 @section('slot')
     <div class="container pt-4">
 
-        <button id="install-button" style="display: none;" class="btn btn-primary">
-            📱 Instalar App
-        </button>
-
         {{-- Cabeçalho --}}
         <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
             <h2 class="mb-0 textColor">Minhas Notas</h2>
