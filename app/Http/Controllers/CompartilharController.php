@@ -12,20 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class CompartilharController extends Controller
 {
-    /**
-     * Recebe arquivos compartilhados de outros apps
-     */
     public function receberCompartilhamento(Request $request)
     {
-        // Log para debug
         Log::info('Compartilhamento recebido', [
             'has_file' => $request->hasFile('arquivo'),
             'title' => $request->input('title'),
         ]);
 
-        // Verificar se usuário está autenticado
         if (!Auth::check()) {
-            // Salvar arquivo temporariamente SE vier arquivo
             if ($request->hasFile('arquivo')) {
                 $arquivo = $request->file('arquivo');
                 $nomeTemp = 'temp_' . time() . '_' . $arquivo->getClientOriginalName();
@@ -41,45 +35,34 @@ class CompartilharController extends Controller
             }
             
             return redirect()->route('login')
-                ->with('info', 'Faça login para salvar o comprovante compartilhado.');
+                ->with('info', 'Faça login para salvar o comprovante.');
         }
 
-        // Se já está autenticado, processar compartilhamento
-        return $this->mostrarOpcoes($request);
-    }
-
-    /**
-     * Mostra opções de como salvar o comprovante
-     */
-    public function mostrarOpcoes(Request $request)
-    {
-        // Se tiver arquivo na requisição, salvar temporariamente
+        // Salvar arquivo ANTES de redirecionar
         if ($request->hasFile('arquivo')) {
             $arquivo = $request->file('arquivo');
             $nomeTemp = 'temp_' . time() . '_' . $arquivo->getClientOriginalName();
             $caminhoTemp = $arquivo->storeAs('temp', $nomeTemp, 'public');
             
-            Log::info('Arquivo salvo temporariamente', [
-                'caminho' => $caminhoTemp,
-                'nome' => $arquivo->getClientOriginalName(),
-            ]);
+            Log::info('Arquivo salvo', ['caminho' => $caminhoTemp]);
             
             session([
                 'compartilhamento_arquivo_temp' => $caminhoTemp,
                 'compartilhamento_arquivo_nome' => $arquivo->getClientOriginalName(),
-                'compartilhamento_title' => $request->input('title'),
-                'compartilhamento_text' => $request->input('text'),
             ]);
         }
 
-        // Buscar categorias e notas do usuário
+        return redirect()->route('compartilhar.opcoes');
+    }
+
+    public function mostrarOpcoes()
+    {
         $categorias = Categoria::where('user_id', Auth::id())->get();
         $notas = Nota::where('user_id', Auth::id())
             ->orderBy('updated_at', 'desc')
             ->limit(50)
             ->get();
 
-        // Se não tem categorias, criar uma padrão
         if ($categorias->isEmpty()) {
             $categoria = Categoria::create([
                 'user_id' => Auth::id(),
@@ -91,9 +74,6 @@ class CompartilharController extends Controller
         return view('compartilhar.escolher-opcao', compact('categorias', 'notas'));
     }
 
-    /**
-     * Salvar em nova nota
-     */
     public function salvarNovaNota(Request $request)
     {
         $validated = $request->validate([
@@ -104,7 +84,6 @@ class CompartilharController extends Controller
         ]);
 
         try {
-            // Criar nota
             $nota = new Nota();
             $nota->user_id = Auth::id();
             $nota->titulo = $validated['titulo'];
@@ -115,31 +94,24 @@ class CompartilharController extends Controller
 
             Log::info('Nota criada', ['nota_id' => $nota->id]);
 
-            // Processar arquivo temporário se existir
             if (session()->has('compartilhamento_arquivo_temp')) {
                 $this->anexarArquivo($nota->id);
             }
 
-            // Limpar sessão
             $this->limparSessao();
 
-            return redirect()->route('notas.show', $nota->id)
-                ->with('success', 'Comprovante salvo em nova nota com sucesso!');
+            // CORRIGIDO: redirecionar para notas.index sem ID
+            return redirect()->route('notas.index')
+                ->with('success', 'Comprovante salvo com sucesso!');
                 
         } catch (\Exception $e) {
-            Log::error('Erro ao salvar nova nota', [
-                'erro' => $e->getMessage(),
-                'linha' => $e->getLine(),
-            ]);
+            Log::error('Erro ao salvar', ['erro' => $e->getMessage()]);
             
             return redirect()->route('notas.index')
-                ->with('error', 'Erro ao salvar comprovante: ' . $e->getMessage());
+                ->with('error', 'Erro: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Anexar a nota existente
-     */
     public function anexarExistente(Request $request)
     {
         $validated = $request->validate([
@@ -147,103 +119,74 @@ class CompartilharController extends Controller
         ]);
 
         try {
-            // Verificar se a nota pertence ao usuário
             $nota = Nota::where('id', $validated['nota_id'])
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
 
-            // Processar arquivo temporário
             if (session()->has('compartilhamento_arquivo_temp')) {
                 $this->anexarArquivo($nota->id);
             }
 
-            // Limpar sessão
             $this->limparSessao();
 
-            return redirect()->route('notas.show', $nota->id)
-                ->with('success', 'Comprovante anexado à nota com sucesso!');
+            return redirect()->route('notas.index')
+                ->with('success', 'Comprovante anexado com sucesso!');
                 
         } catch (\Exception $e) {
-            Log::error('Erro ao anexar a nota existente', [
-                'erro' => $e->getMessage(),
-            ]);
+            Log::error('Erro ao anexar', ['erro' => $e->getMessage()]);
             
             return redirect()->route('notas.index')
-                ->with('error', 'Erro ao anexar comprovante: ' . $e->getMessage());
+                ->with('error', 'Erro: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Anexar arquivo à nota
-     */
     private function anexarArquivo($notaId)
     {
         try {
             $caminhoTemp = session('compartilhamento_arquivo_temp');
             $nomeOriginal = session('compartilhamento_arquivo_nome');
 
-            Log::info('Tentando anexar arquivo', [
-                'caminho_temp' => $caminhoTemp,
-                'nome_original' => $nomeOriginal,
-                'nota_id' => $notaId,
+            Log::info('Anexando', [
+                'temp' => $caminhoTemp,
+                'nome' => $nomeOriginal,
+                'nota' => $notaId,
+                'exists' => Storage::disk('public')->exists($caminhoTemp),
             ]);
 
             if (!$caminhoTemp || !Storage::disk('public')->exists($caminhoTemp)) {
-                Log::warning('Arquivo temporário não encontrado', [
-                    'caminho' => $caminhoTemp,
-                ]);
+                Log::warning('Arquivo não encontrado');
                 return;
             }
 
-            // Gerar nome único para o arquivo
             $extensao = pathinfo($nomeOriginal, PATHINFO_EXTENSION);
             $nomeUnico = uniqid() . '.' . $extensao;
             $novoCaminho = 'anexos/' . $nomeUnico;
 
-            // Copiar arquivo de temp para anexos
             Storage::disk('public')->copy($caminhoTemp, $novoCaminho);
-            
-            // Deletar arquivo temporário
             Storage::disk('public')->delete($caminhoTemp);
 
-            Log::info('Arquivo movido', [
-                'de' => $caminhoTemp,
-                'para' => $novoCaminho,
-            ]);
+            Log::info('Arquivo copiado', ['para' => $novoCaminho]);
 
-            // Obter informações do arquivo
             $caminhoCompleto = Storage::disk('public')->path($novoCaminho);
-            $tamanho = filesize($caminhoCompleto);
-            $mimeType = mime_content_type($caminhoCompleto);
-
-            // Criar registro de anexo
+            
             $anexo = new Anexo();
             $anexo->nota_id = $notaId;
             $anexo->nome_arquivo = $nomeOriginal;
             $anexo->caminho_arquivo = $novoCaminho;
-            $anexo->tipo_arquivo = $mimeType;
-            $anexo->tamanho = $tamanho;
+            $anexo->tipo_arquivo = mime_content_type($caminhoCompleto);
+            $anexo->tamanho = filesize($caminhoCompleto);
             $anexo->save();
 
-            Log::info('Anexo criado com sucesso', [
-                'anexo_id' => $anexo->id,
-            ]);
+            Log::info('Anexo salvo!', ['id' => $anexo->id]);
 
         } catch (\Exception $e) {
-            Log::error('Erro ao anexar arquivo', [
+            Log::error('Erro anexo', [
                 'erro' => $e->getMessage(),
                 'linha' => $e->getLine(),
-                'arquivo' => $e->getFile(),
             ]);
-            
-            // Não lançar exceção para não quebrar o fluxo
-            // A nota já foi criada, só o anexo que falhou
         }
     }
 
-    /**
-     * Limpar dados da sessão
-     */
     private function limparSessao()
     {
         session()->forget([
